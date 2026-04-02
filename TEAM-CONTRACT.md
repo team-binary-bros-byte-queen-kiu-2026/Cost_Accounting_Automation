@@ -17,7 +17,7 @@ All members must type their full name in the Signatures section before committin
 
 | Full name | GitHub username | Primary role |
 |---|---|---|
-| Guga | | Backend & System Architecture |
+| Guga | GugaGagloshvili060 | Backend & System Architecture |
 | Nikoloz Rusishvili | NikolozR | AI & Data Engineering |
 | Anastasia |anitasulukhia| Product, UX & Business / Compliance |
 
@@ -87,4 +87,4 @@ By typing your full name below you confirm you have read this contract and commi
 |---|---|
 | Anastasia Sulukhia | 27 March 2026 |
 | Nikoloz Rusishvili | 27 March 2026 |
-| | 27 March 2026 |
+| Guga Gagloshvili | 27 March 2026 |
