@@ -19,7 +19,7 @@ All members must type their full name in the Signatures section before committin
 |---|---|---|
 | Guga | | Backend & System Architecture |
 | Nikoloz Rusishvili | NikolozR | AI & Data Engineering |
-| Anastasia | | Product, UX & Business / Compliance |
+| Anastasia |anitasulukhia| Product, UX & Business / Compliance |
 
 ---
 
@@ -85,6 +85,6 @@ By typing your full name below you confirm you have read this contract and commi
 
 | Full name (type clearly) | Date |
 |---|---|
-| | 27 March 2026 |
+| Anastasia Sulukhia | 27 March 2026 |
 | Nikoloz Rusishvili | 27 March 2026 |
 | | 27 March 2026 |
