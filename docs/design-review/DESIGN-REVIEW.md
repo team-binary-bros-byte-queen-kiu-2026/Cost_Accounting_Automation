@@ -107,14 +107,6 @@ and project data grounded in the actual reference database.
 
 ## Section 4 — Architecture
 
-**Architecture diagram:**
-
-```
-See: docs/design-review/architecture-diagram.png
-```
-
-The diagram shows: React/Next.js frontend, NestJS backend, OpenAI API (GPT-4o, GPT-4.1, Whisper-1), MongoDB (primary data), Pinecone (vector store), AWS S3 (file storage), and directional arrows for both Flow 1 (report generation) and Flow 2 (chatbot Q&A).
-
 **Technology stack:**
 
 | Layer | Technology | Why |
@@ -212,10 +204,6 @@ User output:
 
 **Team Contract:** Committed to repo root as `TEAM-CONTRACT.md`.
 
-```
-Link: https://github.com/team-binary-bros-byte-queen-kiu-2026/Cost_Accounting_Automation/blob/main/TEAM-CONTRACT.md
-```
-
 ---
 
 ## Section 7 — Safety Threats and Fallback UX
@@ -306,6 +294,3 @@ stored as part of the chat session. The audio file is not persisted.
 - [ ] Google Form completed by one team member
 
 ---
-
-*Design Review for CS-AI-2025 Spring 2026.*
-*Questions: zeshan.ahmad@kiu.edu.ge or course forum.*
