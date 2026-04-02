@@ -17,10 +17,9 @@ All members must type their full name in the Signatures section before committin
 
 | Full name | GitHub username | Primary role |
 |---|---|---|
-| | | |
-| | | |
-| | | |
-| | | |
+| Guga | | Backend & System Architecture |
+| Nikoloz Rusishvili | NikolozR | AI & Data Engineering |
+| Anastasia | | Product, UX & Business / Compliance |
 
 ---
 
@@ -28,40 +27,46 @@ All members must type their full name in the Signatures section before committin
 
 | Area | Owner |
 |---|---|
-| Frontend / UI | |
-| Backend / API | |
-| AI integration (prompts, model calls) | |
-| Database / storage | |
-| DevOps / deployment | |
-| Documentation | |
-| Testing | |
+| Frontend / UI | Anastasia |
+| Backend / API | Guga |
+| AI integration (prompts, model calls) | Nikoloz |
+| Database / storage | Guga |
+| DevOps / deployment | Guga |
+| Documentation | Anastasia |
+| Testing | Anastasia |
 
 ---
 
 ## Working Agreements
 
 **Weekly sync — when and where:**
+Every Friday after lab session; online via Teams if not in person.
 
 **Day-to-day communication channel:**
+WhatsApp group for quick updates; GitHub Issues for task tracking.
 
 **Code review — how changes get merged:**
+All changes go through a pull request. At least one other team member must review and approve before merging to `main`.
 
 **What counts as done:**
+A feature is done when it works end-to-end, is committed with a meaningful message, and has been reviewed by at least one teammate.
 
 ---
 
 ## Contribution Logging
 
 **How each member logs their contributions:**
-(e.g., GitHub commits with meaningful messages, shared log file)
+GitHub commits with descriptive messages. Each member works on their own branch and opens a PR. Weekly verbal summary at the Friday sync.
 
 ---
 
 ## Conflict Resolution
 
 **Technical disagreements — how you decide:**
+Discuss as a team; if no consensus after 15 minutes, take a majority vote among the three members.
 
 **If a member misses a deadline:**
+Notify the team immediately. The team collectively decides whether to reassign the task or extend the timeline by one day maximum before escalating.
 
 **Escalation — if the team cannot resolve internally:**
 Contact the instructor at zeshan.ahmad@kiu.edu.ge.
@@ -81,6 +86,5 @@ By typing your full name below you confirm you have read this contract and commi
 | Full name (type clearly) | Date |
 |---|---|
 | | 27 March 2026 |
-| | 27 March 2026 |
-| | 27 March 2026 |
+| Nikoloz Rusishvili | 27 March 2026 |
 | | 27 March 2026 |
