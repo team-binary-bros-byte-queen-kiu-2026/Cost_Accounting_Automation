@@ -1,12 +1,10 @@
 # Safety and Evaluation Audit
 
 **Team Name:** Binary Bros & Byte Queen
-**Team Members:** Guga, Nikoloz Rusishvili, Anastasia
+**Team Members:** Guga Gagloshvili, Ilia Pkhakadze, Nikoloz Rusishvili, Anastasia
 **Repository:** https://github.com/team-binary-bros-byte-queen-kiu-2026/Cost_Accounting_Automation
 **Audit Commit:** lab8-mcp-capstone (see tag; latest commit SHA updated after tagging)
 **Submitted:** 14 May 2026
-
----
 
 ## Area 1: Episode Log Quality — /2 pts
 
@@ -304,8 +302,6 @@ Confirm ready for Week 11 lab (Friday 15 May):
 - [ ] `python3 eval/run_golden_set.py` runs to completion without errors
 - [x] MCP auth rejection demo: `_auth_token: "wrong"` → `{"error": "unauthorized"}` — reproducible
 - [x] Cross-user isolation: MongoDB query always scoped by `user_id` from JWT — documented above
-- [ ] Team members know who demos each check: Nikoloz → golden set run; Guga → MCP auth; Anastasia → isolation test
+- [ ] Team members know who demos each check: Nikoloz → golden set run; Guga, Anastasia and Ilia → MCP auth, data governence and isolation test
 
 ---
-
-*Safety and Evaluation Audit · CS-AI-2025 · Spring 2026 · KIU*
