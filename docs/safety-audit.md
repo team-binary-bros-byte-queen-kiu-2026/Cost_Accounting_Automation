@@ -1,7 +1,7 @@
 # Safety and Evaluation Audit
 
 **Team Name:** Binary Bros & Byte Queen
-**Team Members:** Guga Gagloshvili, Ilia Pkhakadze, Nikoloz Rusishvili, Anastasia
+**Team Members:** Guga Gagloshvili, Ilia Pkhakadze, Nikoloz Rusishvili, Anastasia Sulukhia
 **Repository:** https://github.com/team-binary-bros-byte-queen-kiu-2026/Cost_Accounting_Automation
 **Audit Commit:** lab8-mcp-capstone (see tag; latest commit SHA updated after tagging)
 **Submitted:** 14 May 2026
