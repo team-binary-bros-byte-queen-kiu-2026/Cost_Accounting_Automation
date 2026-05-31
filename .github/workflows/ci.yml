@@ -19,6 +19,14 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install backend dependencies
         run: |
           pip install -r backend/requirements.txt
@@ -28,6 +36,16 @@ jobs:
           DATABASE_PATH: ./backend/database/prices.db
         run: python backend/database/seed_prices.py
 
+      - name: Check required secrets
+        run: |
+          if [ -z "${{ secrets.OPENROUTER_API_KEY }}" ]; then
+            echo "❌ OPENROUTER_API_KEY secret is not set."
+            echo "   Go to: Settings → Secrets and variables → Actions → New repository secret"
+            echo "   Add OPENROUTER_API_KEY with your OpenRouter API key."
+            exit 1
+          fi
+          echo "✅ OPENROUTER_API_KEY is set"
+
       - name: Start backend
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
@@ -36,9 +54,9 @@ jobs:
           CHROMA_DB_PATH: ./chroma_db
         run: |
           uvicorn backend.main:app --host 0.0.0.0 --port 8000 &
-          sleep 5
-          curl -f http://localhost:8000/health || exit 1
-          echo "Backend is up"
+          sleep 8
+          curl -f http://localhost:8000/health || (echo "❌ Backend failed to start" && exit 1)
+          echo "✅ Backend is up"
 
       - name: Run golden set evaluation
         env:
