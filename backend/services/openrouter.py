@@ -6,7 +6,7 @@ fallback model chain, prompt caching headers, and episode logging.
 import os
 import time
 import httpx
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+from tenacity import retry, stop_after_attempt, wait_exponential
 from . import episode_log
 
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
@@ -45,14 +45,23 @@ def _headers() -> dict:
     }
 
 
+def _is_retryable(exc: BaseException) -> bool:
+    """Only retry on transient errors: timeouts and 5xx server errors."""
+    if isinstance(exc, httpx.TimeoutException):
+        return True
+    if isinstance(exc, httpx.HTTPStatusError):
+        return exc.response.status_code >= 500
+    return False
+
+
 @retry(
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=1, max=8),
-    retry=retry_if_exception_type((httpx.TimeoutException, httpx.HTTPStatusError)),
+    retry=_is_retryable,
     reraise=True,
 )
 def _call_once(model: str, messages: list, **kwargs) -> dict:
-    """Single attempt — tenacity retries on timeout or 5xx."""
+    """Single attempt — tenacity retries on timeout or 5xx only."""
     payload = {"model": model, "messages": messages, **kwargs}
     with httpx.Client(timeout=TIMEOUT) as client:
         resp = client.post(f"{BASE_URL}/chat/completions", headers=_headers(), json=payload)
@@ -121,7 +130,7 @@ def chat(
                 "latency_ms": latency_ms,
                 "cost_usd": cost,
             }
-        except (httpx.RateLimitError, httpx.HTTPStatusError) as e:
+        except httpx.HTTPStatusError as e:
             last_error = e
             episode_log.log_llm_call(
                 session_id=session_id,
