@@ -1,0 +1,54 @@
+name: CI — Golden Set Evaluation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend dependencies
+        run: |
+          pip install -r backend/requirements.txt
+
+      - name: Seed database
+        env:
+          DATABASE_PATH: ./backend/database/prices.db
+        run: python backend/database/seed_prices.py
+
+      - name: Start backend
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          MCP_BEARER_TOKEN: ${{ secrets.MCP_BEARER_TOKEN }}
+          DATABASE_PATH: ./backend/database/prices.db
+          CHROMA_DB_PATH: ./chroma_db
+        run: |
+          uvicorn backend.main:app --host 0.0.0.0 --port 8000 &
+          sleep 5
+          curl -f http://localhost:8000/health || exit 1
+          echo "Backend is up"
+
+      - name: Run golden set evaluation
+        env:
+          BACKEND_URL: http://localhost:8000
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: python eval/run_eval.py
+
+      - name: Upload evaluation results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-results
+          path: eval/results/

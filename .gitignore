@@ -1,0 +1,43 @@
+# Environment
+.env
+.env.local
+*.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Database & vector store
+*.db
+*.sqlite
+chroma_db/
+
+# Logs (keep folder, ignore content)
+logs/*.jsonl
+logs/*.csv
+
+# Node / Next.js
+node_modules/
+.next/
+frontend/.env.local
+frontend/out/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Audio temp files
+*.mp3
+*.wav
+uploads/
