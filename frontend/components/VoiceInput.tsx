@@ -1,6 +1,5 @@
 "use client";
 import { useState, useRef } from "react";
-import { transcribeAudio } from "@/lib/api";
 
 export default function VoiceInput({
   onTranscript,
@@ -9,62 +8,59 @@ export default function VoiceInput({
   onTranscript: (text: string) => void;
   disabled?: boolean;
 }) {
-  const [recording, setRecording] = useState(false);
-  const [processing, setProcessing] = useState(false);
-  const mediaRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
+  const [listening, setListening] = useState(false);
+  const recognizerRef = useRef<SpeechRecognition | null>(null);
 
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      chunksRef.current = [];
-      recorder.ondataavailable = (e) => chunksRef.current.push(e.data);
-      recorder.onstop = async () => {
-        stream.getTracks().forEach((t) => t.stop());
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        setProcessing(true);
-        try {
-          const text = await transcribeAudio(blob);
-          onTranscript(text);
-        } finally {
-          setProcessing(false);
-        }
-      };
-      mediaRef.current = recorder;
-      recorder.start();
-      setRecording(true);
-    } catch {
-      alert("Microphone access denied. Please allow microphone access to use voice input.");
+  const toggle = () => {
+    if (listening) {
+      recognizerRef.current?.stop();
+      setListening(false);
+      return;
     }
-  };
 
-  const stopRecording = () => {
-    mediaRef.current?.stop();
-    setRecording(false);
-  };
+    // Browser Web Speech API — works in Chrome/Edge/Safari natively, no API key needed
+    const SpeechRec =
+      (window as unknown as { SpeechRecognition?: typeof SpeechRecognition; webkitSpeechRecognition?: typeof SpeechRecognition })
+        .SpeechRecognition ||
+      (window as unknown as { webkitSpeechRecognition?: typeof SpeechRecognition })
+        .webkitSpeechRecognition;
 
-  if (processing) {
-    return (
-      <button disabled className="p-3 rounded-xl bg-slate-700 text-slate-400 text-lg">
-        <span className="animate-spin inline-block">⟳</span>
-      </button>
-    );
-  }
+    if (!SpeechRec) {
+      alert("Speech recognition is not supported in this browser. Please use Chrome.");
+      return;
+    }
+
+    const rec = new SpeechRec();
+    rec.lang = "ka-GE,en-US"; // Georgian first, English fallback
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+
+    rec.onresult = (e: SpeechRecognitionEvent) => {
+      const transcript = e.results[0]?.[0]?.transcript ?? "";
+      if (transcript) onTranscript(transcript);
+    };
+
+    rec.onerror = () => setListening(false);
+    rec.onend = () => setListening(false);
+
+    recognizerRef.current = rec;
+    rec.start();
+    setListening(true);
+  };
 
   return (
     <button
-      onMouseDown={startRecording}
-      onMouseUp={stopRecording}
-      onTouchStart={startRecording}
-      onTouchEnd={stopRecording}
+      type="button"
+      onClick={toggle}
       disabled={disabled}
-      title="Hold to speak"
-      className={`p-3 rounded-xl text-lg transition-colors
-        ${recording ? "bg-red-600 text-white animate-pulse" : "bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700"}
+      title={listening ? "Click to stop" : "Click to speak"}
+      className={`p-3 rounded-xl text-lg transition-all
+        ${listening
+          ? "bg-red-600 text-white scale-110 ring-2 ring-red-400 ring-offset-1 ring-offset-slate-900"
+          : "bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700"}
         disabled:opacity-50`}
     >
-      🎤
+      {listening ? "🔴" : "🎤"}
     </button>
   );
 }
