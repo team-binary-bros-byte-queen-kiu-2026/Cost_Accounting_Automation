@@ -24,6 +24,7 @@ export default function ChatStream({ sessionId }: { sessionId: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
+  const [voiceProcessing, setVoiceProcessing] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -125,16 +126,28 @@ export default function ChatStream({ sessionId }: { sessionId: string }) {
 
       {/* Input row */}
       <div className="flex gap-2 items-center">
-        <VoiceInput onTranscript={(t) => { setInput(t); }} disabled={streaming} />
-
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && send(input)}
-          placeholder="Ask about your estimate…"
+        <VoiceInput
+          onTranscript={(t) => { setVoiceProcessing(false); setInput(t); }}
+          onProcessingChange={setVoiceProcessing}
           disabled={streaming}
-          className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-sky-500 disabled:opacity-50"
         />
+
+        <div className="relative flex-1">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && send(input)}
+            placeholder={voiceProcessing ? "" : "Ask about your estimate…"}
+            disabled={streaming || voiceProcessing}
+            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-sky-500 disabled:opacity-100"
+          />
+          {/* Blinking typing cursor shown while voice is being processed */}
+          {voiceProcessing && (
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sky-400 text-sm font-mono animate-pulse select-none pointer-events-none">
+              |
+            </span>
+          )}
+        </div>
 
         {streaming ? (
           <button

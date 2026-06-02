@@ -25,9 +25,11 @@ type Any = any;
 
 export default function VoiceInput({
   onTranscript,
+  onProcessingChange,
   disabled = false,
 }: {
   onTranscript: (text: string) => void;
+  onProcessingChange?: (processing: boolean) => void;
   disabled?: boolean;
 }) {
   const [listening, setListening] = useState(false);
@@ -35,11 +37,16 @@ export default function VoiceInput({
   const recRef = useRef<Any>(null);
   const resultReceivedRef = useRef(false);
 
+  const setProc = (val: boolean) => {
+    setProcessing(val);
+    onProcessingChange?.(val);
+  };
+
   const toggle = () => {
     if (listening || processing) {
       recRef.current?.stop();
       setListening(false);
-      setProcessing(false);
+      setProc(false);
       return;
     }
 
@@ -61,27 +68,25 @@ export default function VoiceInput({
     // Result arrives → clear processing, pass text up
     rec.onresult = (e: Any) => {
       resultReceivedRef.current = true;
-      setProcessing(false);
+      setProc(false);
       const text: string = e.results[0]?.[0]?.transcript ?? "";
       if (text) onTranscript(text);
     };
 
-    // Recognition session ended — switch to "processing" dots
-    // if the result hasn't arrived yet
+    // Speech ended — switch from wave to processing dots
     rec.onspeechend = () => {
       setListening(false);
-      if (!resultReceivedRef.current) setProcessing(true);
+      if (!resultReceivedRef.current) setProc(true);
     };
 
     rec.onend = () => {
       setListening(false);
-      // If result already came, clear processing; otherwise leave it
-      if (resultReceivedRef.current) setProcessing(false);
+      if (resultReceivedRef.current) setProc(false);
     };
 
     rec.onerror = () => {
       setListening(false);
-      setProcessing(false);
+      setProc(false);
     };
 
     recRef.current = rec;
