@@ -1,90 +1,39 @@
-# Team Contract
+# Team Contract — ConstructAI
+**Course:** CS-AI-2025 · Building AI-Powered Applications · Spring 2026
+**Team Name:** [Your team name]
+**Date:** [Date]
 
-**Course:** CS-AI-2025 Spring 2026 | **Due:** End of Lab 3, 27 March 2026
-**Commit as:** `TEAM-CONTRACT.md` in your team repo root
+## Team Members
 
-All members must type their full name in the Signatures section before committing.
+| Name | Student ID | Role | GitHub username |
+|------|-----------|------|----------------|
+| [Member 1] | | Team Lead / Backend | |
+| [Member 2] | | Frontend / UX | |
+| [Member 3] | | AI / MCP / RAG | |
+| [Member 4] | | DevOps / Testing | |
 
----
+## Responsibilities
 
-## Team Identity
+- **Team Lead / Backend:** FastAPI app, agents, OpenRouter integration, episode logging
+- **Frontend / UX:** Next.js pages, components, design
+- **AI / MCP / RAG:** MCP server, ChromaDB ingestion, model benchmarking, safety audit
+- **DevOps / Testing:** CI/CD pipeline, Docker, golden set evaluation, repository review compliance
 
-**Team name:** Binary Bros & Byte Queen
-**Project title:** Cost Accounting Automation
-**Repo URL:** `github.com/team-binary-bros-byte-queen-kiu-2026/Cost_Accounting_Automation`
+## Ground Rules
 
-**Team members:**
-
-| Full name | GitHub username | Primary role |
-|---|---|---|
-| Guga | GugaGagloshvili060 | Backend & System Architecture |
-| Nikoloz Rusishvili | NikolozR | AI & Data Engineering |
-| Anastasia |anitasulukhia| Product, UX & Business / Compliance |
-
----
-
-## Roles
-
-| Area | Owner |
-|---|---|
-| Frontend / UI | Anastasia |
-| Backend / API | Guga |
-| AI integration (prompts, model calls) | Nikoloz |
-| Database / storage | Guga |
-| DevOps / deployment | Guga |
-| Documentation | Anastasia |
-| Testing | Anastasia |
-
----
-
-## Working Agreements
-
-**Weekly sync — when and where:**
-Every Friday after lab session; online via Teams if not in person.
-
-**Day-to-day communication channel:**
-WhatsApp group for quick updates; GitHub Issues for task tracking.
-
-**Code review — how changes get merged:**
-All changes go through a pull request. At least one other team member must review and approve before merging to `main`.
-
-**What counts as done:**
-A feature is done when it works end-to-end, is committed with a meaningful message, and has been reviewed by at least one teammate.
-
----
-
-## Contribution Logging
-
-**How each member logs their contributions:**
-GitHub commits with descriptive messages. Each member works on their own branch and opens a PR. Weekly verbal summary at the Friday sync.
-
----
-
-## Conflict Resolution
-
-**Technical disagreements — how you decide:**
-Discuss as a team; if no consensus after 15 minutes, take a majority vote among the three members.
-
-**If a member misses a deadline:**
-Notify the team immediately. The team collectively decides whether to reassign the task or extend the timeline by one day maximum before escalating.
-
-**Escalation — if the team cannot resolve internally:**
-Contact the instructor at zeshan.ahmad@kiu.edu.ge.
-
----
-
-## Academic Integrity
-
-All members confirm: we will not submit AI-generated work without attribution, we will commit with meaningful messages, and we understand the instructor may request an oral defence of any submission.
-
----
+1. All code is committed with descriptive messages before each lab session ends
+2. No one commits directly to `main` without another member reviewing
+3. `.env` files are NEVER committed — use `.env.example` only
+4. Every git tag is pushed to remote immediately after creation
+5. Cost log and episode log are never deleted
+6. Any price database change is documented with the source
+7. If a team member is blocked, they communicate in the group chat within 2 hours
 
 ## Signatures
 
-By typing your full name below you confirm you have read this contract and commit to upholding it.
+By pushing to this repository, all members agree to this contract.
 
-| Full name (type clearly) | Date |
-|---|---|
-| Anastasia Sulukhia | 27 March 2026 |
-| Nikoloz Rusishvili | 27 March 2026 |
-| Guga Gagloshvili | 27 March 2026 |
+- [ ] [Member 1] — _______________________
+- [ ] [Member 2] — _______________________
+- [ ] [Member 3] — _______________________
+- [ ] [Member 4] — _______________________
