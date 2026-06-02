@@ -18,6 +18,11 @@ def seed():
     with open(schema_path) as f:
         conn.executescript(f.read())
 
+    # Clear existing price data before re-seeding to avoid duplicates
+    cur.execute("DELETE FROM materials")
+    cur.execute("DELETE FROM labor")
+    cur.execute("DELETE FROM equipment")
+
     # ── MATERIALS ─────────────────────────────────────────────────────────────
     # Prices sourced from mymarket.ge listings (June 2026, Tbilisi market).
     # Units: m3=cubic metre, m2=square metre, kg=kilogram, unit=piece/item,
@@ -169,7 +174,7 @@ def seed():
     ]
 
     cur.executemany(
-        "INSERT OR IGNORE INTO materials (name, category, unit, price_gel, description) VALUES (?,?,?,?,?)",
+        "INSERT INTO materials (name, category, unit, price_gel, description) VALUES (?,?,?,?,?)",
         materials,
     )
 
@@ -210,7 +215,7 @@ def seed():
     ]
 
     cur.executemany(
-        "INSERT OR IGNORE INTO labor (trade, unit, price_gel, description) VALUES (?,?,?,?)",
+        "INSERT INTO labor (trade, unit, price_gel, description) VALUES (?,?,?,?)",
         labor,
     )
 
@@ -233,7 +238,7 @@ def seed():
     ]
 
     cur.executemany(
-        "INSERT OR IGNORE INTO equipment (name, unit, price_gel, description) VALUES (?,?,?,?)",
+        "INSERT INTO equipment (name, unit, price_gel, description) VALUES (?,?,?,?)",
         equipment,
     )
 
