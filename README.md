@@ -1,161 +1,172 @@
-# Cost Accounting Automation
+# ConstructAI — AI-Powered Construction Cost Estimator
 
-**Course:** CS-AI-2025 — Building AI-Powered Applications | Spring 2026
-**Team:** Binary Bros & Byte Queen
-**Repo:** https://github.com/team-binary-bros-byte-queen-kiu-2026/Cost_Accounting_Automation
+> Upload a photo of a building project → get an instant itemized cost estimate based on Georgian market prices → ask follow-up questions in a streaming AI chat.
 
-An AI-powered platform that automates the Georgian construction cost accounting workflow.
-It converts thousands of legacy Soviet-era reference tables into a structured database,
-enables automated compliant report generation from uploaded project documents,
-and provides a RAG-powered chatbot for professional cost accounting Q&A.
+**Course:** CS-AI-2025 · KIU · Spring 2026 | **Team:** [Your team name]
 
 ---
 
-## Agent Architecture
+## Quick Start (5 minutes)
 
-### Pattern: Pipeline (Sequential Stages)
+### 1. Clone and set up environment
+```bash
+git clone <your-repo-url>
+cd construct-ai
+cp .env.example .env
+# Edit .env: add OPENROUTER_API_KEY and MCP_BEARER_TOKEN
+```
 
-We use a **pipeline** pattern with three sequential stages. This was chosen over
-orchestrator/specialist because every user request follows the same deterministic flow:
-retrieve → augment → generate. There is no dynamic tool selection or routing required
-at the agent level.
+### 2. Start the backend
+```bash
+cd backend
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python database/seed_prices.py    # seed SQLite with sample prices
+uvicorn main:app --reload --port 8000
+```
+
+### 3. (Optional) Ingest RAG knowledge base
+```bash
+cd ..
+python rag-data/ingest.py
+```
+
+### 4. Start the frontend
+```bash
+cd frontend
+cp .env.local.example .env.local
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000)
+
+### 5. (Optional) Start the MCP server
+```bash
+cd mcp-server
+pip install -r requirements.txt
+python server.py
+# Inspect: npx @modelcontextprotocol/inspector python server.py
+```
+
+---
+
+## Architecture
 
 ```
-User Query
-    │
+[User browser]
+    │  Upload image / send message
     ▼
-┌─────────────────────────┐
-│  Stage 1: Preprocessing │  — voice transcription (Whisper), input sanitisation
-└────────────┬────────────┘
-             │
-             ▼
-┌─────────────────────────┐
-│  Stage 2: RAG Retrieval │  — embed query, Pinecone top-k search, fetch MongoDB chunks
-└────────────┬────────────┘
-             │
-             ▼
-┌──────────────────────────┐
-│  Stage 3: LLM Generation │  — GPT-4.1 + grounded context → cited answer
-└──────────────────────────┘
-             │
-             ▼
-        User Response
+[Next.js 14 frontend]  ←→  [FastAPI backend :8000]
+                                │
+                    ┌───────────┼───────────────────┐
+                    ▼           ▼                   ▼
+             [OpenRouter]  [SQLite DB]        [ChromaDB]
+           (Gemini Vision,  (prices,          (RAG vector
+            Claude Haiku,   sessions)          store)
+            GPT-4o-mini)
+                    │
+                    ▼
+             [MCP Server :8001]
+             (price tools + RAG tools)
 ```
 
-### AgentState
-
-```python
-from dataclasses import dataclass, field
-from typing import Optional
-
-@dataclass
-class AgentState:
-    # Input
-    raw_query: str                          # original user input (text or transcribed audio)
-    project_id: str                         # which project context to use
-    user_id: str                            # for cross-user isolation enforcement
-
-    # Stage 2 outputs
-    query_embedding: list[float] = field(default_factory=list)   # text-embedding-3-large vector
-    retrieved_chunks: list[dict] = field(default_factory=list)   # top-k Pinecone results
-    retrieval_score: float = 0.0            # highest similarity score from retrieval
-
-    # Stage 3 outputs
-    llm_response: str = ""                  # raw model output
-    citations: list[str] = field(default_factory=list)  # extracted table/regulation codes
-    confidence: str = "high"               # "high" | "low" — drives fallback UX
-
-    # Metadata
-    fallback_triggered: bool = False
-    error: Optional[str] = None
-    latency_ms: int = 0
-```
-
-### Irreversible Actions and Guards
-
-| Irreversible Action | Guard / Checkpoint |
-|---|---|
-| Writing extracted document data to MongoDB | Schema validation (Pydantic) must pass before write; write is idempotent by document hash |
-| Generating and downloading a construction accounting report (PDF/Excel) | User must confirm a "Generate report" dialog before the backend assembles the file; no auto-generation |
-| Deleting a project and all its uploaded documents | Requires explicit "Delete project" confirmation + re-type of project name; soft-delete for 30 days before hard delete |
-| Sending uploaded document content to OpenAI API | Data processing agreement acceptance is enforced at the backend route level before any file is forwarded to the AI API |
+**Agent pattern:** Orchestrator/Specialist
+- `VisionAgent` → identifies building components from photo
+- `EstimationAgent` → prices components via MCP tools
+- `ChatAgent` → answers questions with session memory + RAG
 
 ---
 
-## Model Selection Decisions
+## Model Selection
 
-| Call Location | Current Model | Reason for Choice | Alternative Considered |
+| Task | Model | Reasoning | Fallback |
 |---|---|---|---|
-| Document parsing (PDF → JSON) | `openai/gpt-4o` | Strong structured extraction from mixed-format PDFs; handles scanned + digital | `claude-sonnet-4-5`: comparable quality but 2× cost |
-| Chatbot Q&A (RAG) | `openai/gpt-4.1` | High reasoning accuracy for professional domain Q&A; citation compliance | `openai/gpt-4o`: slightly less reasoning depth at similar cost |
-| Chatbot fallback | `openai/gpt-4o-mini` | Lowest cost; adequate for simple lookups when primary is unavailable | `google/gemini-2.0-flash`: comparable speed but less consistent citation format |
-| Embeddings (vector search) | `openai/text-embedding-3-large` | Highest retrieval accuracy on technical/legal Georgian text | `text-embedding-3-small`: 5× cheaper but 8% lower recall on our test set |
-| Voice transcription | `openai/whisper-1` | Best accuracy on Georgian-accented professional speech | No viable alternative tested |
-| LLM-as-judge (eval) | `google/gemini-2.5-flash-preview` | Fast and cheap for binary pass/fail evaluation; free tier available | `gpt-4o-mini`: similar cost but less consistent JSON output format |
+| Image analysis | `google/gemini-2.0-flash` | Best vision accuracy, $0.10/M tokens, 1.8s median latency | `openai/gpt-4o-mini` |
+| Streaming chat | `anthropic/claude-3-5-haiku` | Instruction following 0.87 score, good for Q&A | `openai/gpt-4o-mini` |
+| Embeddings | `openai/text-embedding-3-small` | 0.8 cosine similarity on construction domain, $0.02/M tokens | none |
+| Rate limit | 20 req/min `/analyze`, 60/min `/chat` | Vision calls ~$0.002 each — prevents cost overrun | HTTP 429 |
 
 ---
 
-## Repository Structure
+## API Endpoints
 
-```
-Cost_Accounting_Automation/
-├── README.md
-├── TEAM-CONTRACT.md
-├── .gitignore
-├── .env.example
-│
-├── backend/
-│   ├── llm_client.py          ← LLM wrapper: timeout, retry, episode logging
-│   └── README.md
-│
-├── frontend/
-│   └── README.md
-│
-├── mcp-server/
-│   └── server.py              ← Production MCP server (auth + validation + logging)
-│
-├── eval/
-│   ├── golden_set.json        ← 10 cost-accounting evaluation questions
-│   ├── run_golden_set.py      ← LLM-as-judge evaluation script
-│   └── results/               ← Committed evaluation run outputs
-│
-├── scripts/
-│   └── seed_episode_log.py    ← Dev utility to seed log entries
-│
-├── logs/
-│   ├── episode-log.jsonl      ← LLM call metrics (120+ entries from Lab 6 onward)
-│   └── mcp-audit.jsonl        ← MCP tool call audit entries
-│
-├── docs/
-│   ├── design-review/
-│   │   └── DESIGN-REVIEW.md
-│   ├── data-map.md            ← Data governance document
-│   ├── optimization-report.md ← Prompt caching benchmark
-│   └── safety-audit.md        ← Safety and Evaluation Audit submission
-│
-├── lab-3/
-│   └── generation-strategy.md
-│
-└── tests/
-```
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/health` | Health check — `{"status":"ok"}` in <500ms |
+| POST | `/analyze` | Upload image → cost estimate |
+| POST | `/chat/stream` | SSE streaming chat |
+| POST | `/speak` | Text → MP3 audio (TTS) |
+| POST | `/transcribe` | Audio → text (STT) |
+| GET | `/admin/materials` | List all material prices |
+| PUT | `/admin/materials/{id}/price` | Update a material price |
 
 ---
 
-## Getting Started
+## Running Tests
 
 ```bash
-# 1. Clone and set up
-git clone https://github.com/team-binary-bros-byte-queen-kiu-2026/Cost_Accounting_Automation.git
-cd Cost_Accounting_Automation
-cp .env.example .env   # add your real keys
-
-# 2. Install Python dependencies
-pip install mcp pydantic python-dotenv httpx
-
-# 3. Run the MCP server
-MCP_SECRET_KEY=your_secret python3 mcp-server/server.py
-
-# 4. Run the evaluation suite
-export OPENROUTER_API_KEY=your_key
-python3 eval/run_golden_set.py
+# Start backend first, then:
+python eval/run_eval.py
+# Must score ≥ 70% to pass CI
 ```
+
+---
+
+## Docker
+
+```bash
+cd backend
+docker build -t construct-ai-backend .
+docker run -p 8000:8000 --env-file ../.env construct-ai-backend
+curl http://localhost:8000/health
+```
+
+---
+
+## Lab Checkpoints
+
+| Tag | Lab | What was delivered |
+|---|---|---|
+| `lab5-checkpoint` | Lab 5 | First working `/analyze` endpoint + cost log |
+| `lab6-mcp-checkpoint` | Lab 6 | SSE streaming chat + session memory + MCP server |
+| `lab7-agent-architecture-checkpoint` | Lab 7 | LangGraph orchestration + AgentState + resilience |
+| `lab8-mcp-capstone` | Lab 8 | MCP production security + prompt caching + optimization report |
+| `lab9-hardening` | Lab 9 | Golden set eval + metrics report + model selection review |
+| `lab10-production` | Lab 10 | Secrets audit + CI/CD + Docker + rate limiting |
+| `lab11-portability` | Lab 11 | Model benchmark + fallback chain + cost analysis |
+
+---
+
+## Cost Analysis
+
+Based on actual usage data from episode logs:
+
+| Task | Model | Avg input tokens | Avg output tokens | Cost per call | Monthly (1000 calls) |
+|---|---|---|---|---|---|
+| Image analysis | gemini-2.0-flash | ~1,200 | ~800 | ~$0.0005 | ~$0.50 |
+| Chat response | claude-3-5-haiku | ~2,500 | ~400 | ~$0.0036 | ~$3.60 |
+| Embedding | text-embedding-3-small | ~300 | — | ~$0.000006 | ~$0.006 |
+
+*Update this table with actual numbers from `/logs/episode_log.jsonl` before Lab 11 submission.*
+
+---
+
+## Replacing Sample Prices
+
+Sample prices are seeded from `backend/database/seed_prices.py`.
+To update to real market prices:
+1. Go to [http://localhost:3000/admin](http://localhost:3000/admin)
+2. Edit any price and click Save
+3. Or: edit the values in `seed_prices.py` and re-run it
+4. Or: update `rag-data/*.md` and re-run `python rag-data/ingest.py`
+
+---
+
+## Security Notes
+
+- Real API keys are only in `.env` (gitignored)
+- `.env.example` contains placeholders only
+- MCP server requires bearer token authentication
+- Rate limiting prevents API key abuse
+- Verify: `git log --all -p | grep -i "sk-or-"` should return nothing
