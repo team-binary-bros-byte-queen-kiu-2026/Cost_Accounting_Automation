@@ -5,25 +5,48 @@ import VoiceInput from "./VoiceInput";
 
 type Message = { role: "user" | "assistant"; content: string };
 
+// Animated 3-dot thinking indicator
+function ThinkingDots() {
+  return (
+    <span className="inline-flex items-center gap-1 px-1">
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-bounce"
+          style={{ animationDelay: `${i * 0.15}s`, animationDuration: "0.8s" }}
+        />
+      ))}
+    </span>
+  );
+}
+
 export default function ChatStream({ sessionId }: { sessionId: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const stop = () => {
+    abortRef.current?.abort();
+    setStreaming(false);
+  };
+
   const send = async (text: string) => {
     if (!text.trim() || streaming) return;
-    const userMsg: Message = { role: "user", content: text };
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((prev) => [...prev, { role: "user", content: text }]);
     setInput("");
     setStreaming(true);
 
-    const assistantMsg: Message = { role: "assistant", content: "" };
-    setMessages((prev) => [...prev, assistantMsg]);
+    // Empty assistant bubble — shows ThinkingDots until first token arrives
+    setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
+    const ctrl = new AbortController();
+    abortRef.current = ctrl;
 
     try {
       await streamChat(sessionId, text, (token) => {
@@ -35,9 +58,21 @@ export default function ChatStream({ sessionId }: { sessionId: string }) {
           };
           return updated;
         });
-      });
+      }, ctrl.signal);
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name !== "AbortError") {
+        setMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            ...updated[updated.length - 1],
+            content: "Sorry, something went wrong. Please try again.",
+          };
+          return updated;
+        });
+      }
     } finally {
       setStreaming(false);
+      abortRef.current = null;
     }
   };
 
@@ -68,23 +103,30 @@ export default function ChatStream({ sessionId }: { sessionId: string }) {
             </div>
           </div>
         )}
-        {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed
-              ${m.role === "user"
-                ? "bg-sky-700 text-white"
-                : "bg-slate-800 text-slate-100 border border-slate-700"}`}
-            >
-              {m.content || (streaming && m.role === "assistant" ? <span className="animate-pulse">▌</span> : "")}
+
+        {messages.map((m, i) => {
+          const isThinking =
+            m.role === "assistant" && m.content === "" && streaming && i === messages.length - 1;
+          return (
+            <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div
+                className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed
+                  ${m.role === "user"
+                    ? "bg-sky-700 text-white"
+                    : "bg-slate-800 text-slate-100 border border-slate-700"}`}
+              >
+                {isThinking ? <ThinkingDots /> : m.content}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div ref={bottomRef} />
       </div>
 
       {/* Input row */}
       <div className="flex gap-2 items-center">
-        <VoiceInput onTranscript={(t) => setInput(t)} disabled={streaming} />
+        <VoiceInput onTranscript={(t) => { setInput(t); }} disabled={streaming} />
+
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -93,13 +135,24 @@ export default function ChatStream({ sessionId }: { sessionId: string }) {
           disabled={streaming}
           className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-sky-500 disabled:opacity-50"
         />
-        <button
-          onClick={() => send(input)}
-          disabled={!input.trim() || streaming}
-          className="px-4 py-3 bg-sky-600 hover:bg-sky-500 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-xl transition-colors text-sm font-medium"
-        >
-          Send
-        </button>
+
+        {streaming ? (
+          <button
+            onClick={stop}
+            className="px-4 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl transition-colors text-sm font-medium flex items-center gap-1.5"
+          >
+            <span className="w-2.5 h-2.5 bg-white rounded-sm inline-block" />
+            Stop
+          </button>
+        ) : (
+          <button
+            onClick={() => send(input)}
+            disabled={!input.trim()}
+            className="px-4 py-3 bg-sky-600 hover:bg-sky-500 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-xl transition-colors text-sm font-medium"
+          >
+            Send
+          </button>
+        )}
       </div>
     </div>
   );
