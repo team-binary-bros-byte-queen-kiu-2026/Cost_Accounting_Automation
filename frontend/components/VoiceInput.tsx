@@ -1,6 +1,9 @@
 "use client";
 import { useState, useRef } from "react";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnySpeechRecognition = any;
+
 export default function VoiceInput({
   onTranscript,
   disabled = false,
@@ -9,41 +12,45 @@ export default function VoiceInput({
   disabled?: boolean;
 }) {
   const [listening, setListening] = useState(false);
-  const recognizerRef = useRef<SpeechRecognition | null>(null);
+  const recRef = useRef<AnySpeechRecognition>(null);
 
   const toggle = () => {
     if (listening) {
-      recognizerRef.current?.stop();
+      recRef.current?.stop();
       setListening(false);
       return;
     }
 
-    // Browser Web Speech API — works in Chrome/Edge/Safari natively, no API key needed
-    const SpeechRec =
-      (window as unknown as { SpeechRecognition?: typeof SpeechRecognition; webkitSpeechRecognition?: typeof SpeechRecognition })
-        .SpeechRecognition ||
-      (window as unknown as { webkitSpeechRecognition?: typeof SpeechRecognition })
-        .webkitSpeechRecognition;
+    // Use browser Web Speech API — Chrome, Edge, Safari all support it on localhost
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const W = window as any;
+    const SpeechRec = W.SpeechRecognition || W.webkitSpeechRecognition;
 
     if (!SpeechRec) {
-      alert("Speech recognition is not supported in this browser. Please use Chrome.");
+      alert("Voice input requires Chrome or Edge. Firefox does not support Web Speech API.");
       return;
     }
 
     const rec = new SpeechRec();
-    rec.lang = "ka-GE,en-US"; // Georgian first, English fallback
+    rec.lang = "en-US";          // single valid BCP-47 tag
+    rec.continuous = false;
     rec.interimResults = false;
     rec.maxAlternatives = 1;
 
-    rec.onresult = (e: SpeechRecognitionEvent) => {
-      const transcript = e.results[0]?.[0]?.transcript ?? "";
-      if (transcript) onTranscript(transcript);
+    rec.onresult = (e: { results: { [k: number]: { [k: number]: { transcript: string } } } }) => {
+      const text = e.results[0]?.[0]?.transcript ?? "";
+      if (text) onTranscript(text);
     };
 
-    rec.onerror = () => setListening(false);
-    rec.onend = () => setListening(false);
+    rec.onerror = () => {
+      setListening(false);
+    };
 
-    recognizerRef.current = rec;
+    rec.onend = () => {
+      setListening(false);
+    };
+
+    recRef.current = rec;
     rec.start();
     setListening(true);
   };
@@ -53,10 +60,10 @@ export default function VoiceInput({
       type="button"
       onClick={toggle}
       disabled={disabled}
-      title={listening ? "Click to stop" : "Click to speak"}
-      className={`p-3 rounded-xl text-lg transition-all
+      title={listening ? "Click to stop recording" : "Click to speak"}
+      className={`p-3 rounded-xl text-lg transition-all select-none
         ${listening
-          ? "bg-red-600 text-white scale-110 ring-2 ring-red-400 ring-offset-1 ring-offset-slate-900"
+          ? "bg-red-600 text-white scale-110 ring-2 ring-red-400 ring-offset-1 ring-offset-slate-900 animate-pulse"
           : "bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700"}
         disabled:opacity-50`}
     >
