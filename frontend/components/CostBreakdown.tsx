@@ -57,8 +57,10 @@ export default function CostBreakdown({
         <h2 className="text-white font-semibold">Cost Breakdown by Category</h2>
         <button
           onClick={handleSpeak}
-          disabled={speaking}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors disabled:opacity-50"
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors
+            ${speaking
+              ? "bg-red-700 hover:bg-red-600 text-white"
+              : "bg-slate-800 hover:bg-slate-700 text-slate-300"}`}
         >
           {speaking ? "⏹ Stop" : "🔊 Read Aloud"}
         </button>
