@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { speakText } from "@/lib/api";
 
 type LineItem = {
   name: string; category: string; quantity: number; unit: string;
@@ -27,25 +26,29 @@ export default function CostBreakdown({
     high: "text-emerald-400", medium: "text-amber-400", low: "text-red-400",
   }[c] ?? "text-slate-400");
 
-  const handleSpeak = async () => {
-    setSpeaking(true);
+  const handleSpeak = () => {
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
     const total = (estimate.grand_total_gel as number).toLocaleString();
     const materials = (estimate.materials_total_gel as number).toLocaleString();
     const labor = (estimate.labor_estimate_gel as number).toLocaleString();
-    const text = `Your construction cost estimate. Total: ${total} Georgian Lari.
-      Materials: ${materials} GEL. Labor: ${labor} GEL.
-      ${items.length} components identified.
-      Overall confidence: ${estimate.confidence}.
-      Note: ${estimate.notes}`;
-    try {
-      const audioBlob = await speakText(text);
-      const url = URL.createObjectURL(audioBlob);
-      const audio = new Audio(url);
-      audio.onended = () => { setSpeaking(false); URL.revokeObjectURL(url); };
-      audio.play();
-    } catch {
-      setSpeaking(false);
-    }
+    const text =
+      `Construction cost estimate. Total: ${total} Georgian Lari. ` +
+      `Materials: ${materials} GEL. Labor: ${labor} GEL. ` +
+      `${items.length} components identified. ` +
+      `Confidence: ${estimate.confidence}. ` +
+      `${estimate.notes ?? ""}`;
+
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = "en-US";
+    utt.rate = 1.0;
+    utt.onend = () => setSpeaking(false);
+    utt.onerror = () => setSpeaking(false);
+    setSpeaking(true);
+    window.speechSynthesis.speak(utt);
   };
 
   return (
@@ -54,10 +57,12 @@ export default function CostBreakdown({
         <h2 className="text-white font-semibold">Cost Breakdown by Category</h2>
         <button
           onClick={handleSpeak}
-          disabled={speaking}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors disabled:opacity-50"
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors
+            ${speaking
+              ? "bg-red-700 hover:bg-red-600 text-white"
+              : "bg-slate-800 hover:bg-slate-700 text-slate-300"}`}
         >
-          {speaking ? "🔊 Reading…" : "🔊 Read Aloud"}
+          {speaking ? "⏹ Stop" : "🔊 Read Aloud"}
         </button>
       </div>
 

@@ -30,12 +30,14 @@ export async function analyzeImage(file: File): Promise<{ session_id: string; es
 export async function streamChat(
   sessionId: string,
   message: string,
-  onToken: (token: string) => void
+  onToken: (token: string) => void,
+  signal?: AbortSignal
 ): Promise<void> {
   const resp = await fetch(`${API}/chat/stream`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ session_id: sessionId, message }),
+    signal,
   });
   if (!resp.ok || !resp.body) throw new Error(`Chat failed (${resp.status})`);
 
@@ -43,22 +45,26 @@ export async function streamChat(
   const decoder = new TextDecoder();
   let buffer = "";
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
-    for (const line of lines) {
-      if (line.startsWith("data: ")) {
-        const chunk = line.slice(6);
-        if (chunk === "[DONE]") return;
-        try {
-          const data = JSON.parse(chunk);
-          if (data.token) onToken(data.token);
-        } catch { /* ignore malformed */ }
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          const chunk = line.slice(6);
+          if (chunk === "[DONE]") return;
+          try {
+            const data = JSON.parse(chunk);
+            if (data.token) onToken(data.token);
+          } catch { /* ignore malformed */ }
+        }
       }
     }
+  } finally {
+    reader.cancel().catch(() => {});
   }
 }
 
