@@ -82,7 +82,7 @@ python server.py
 
 | Task | Model | Reasoning | Fallback |
 |---|---|---|---|
-| Image analysis | `google/gemini-2.0-flash` | Best vision accuracy, $0.10/M tokens, 1.8s median latency | `openai/gpt-4o-mini` |
+| Image analysis | `google/gemini-3-flash` | Best vision accuracy, $0.075/M tokens, fast latency | `openai/gpt-4o-mini` |
 | Streaming chat | `anthropic/claude-3-5-haiku` | Instruction following 0.87 score, good for Q&A | `openai/gpt-4o-mini` |
 | Embeddings | `openai/text-embedding-3-small` | 0.8 cosine similarity on construction domain, $0.02/M tokens | none |
 | Rate limit | 20 req/min `/analyze`, 60/min `/chat` | Vision calls ~$0.002 each — prevents cost overrun | HTTP 429 |
@@ -144,7 +144,7 @@ Based on actual usage data from episode logs:
 
 | Task | Model | Avg input tokens | Avg output tokens | Cost per call | Monthly (1000 calls) |
 |---|---|---|---|---|---|
-| Image analysis | gemini-2.0-flash | ~1,200 | ~800 | ~$0.0005 | ~$0.50 |
+| Image analysis | gemini-3-flash | ~1,200 | ~800 | ~$0.00036 | ~$0.36 |
 | Chat response | claude-3-5-haiku | ~2,500 | ~400 | ~$0.0036 | ~$3.60 |
 | Embedding | text-embedding-3-small | ~300 | — | ~$0.000006 | ~$0.006 |
 
