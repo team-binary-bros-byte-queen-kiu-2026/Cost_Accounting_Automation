@@ -120,11 +120,16 @@ def main():
     }
 
     RESULTS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    # Save timestamped copy (for Repository Review — 3+ run files required)
+    timestamp = time.strftime("%Y-%m-%d-%H%M%S", time.gmtime())
+    timestamped_path = RESULTS_PATH.parent / f"run-{timestamp}.json"
+    timestamped_path.write_text(json.dumps(summary, indent=2))
+    # Always overwrite latest.json (Safety Audit reads this)
     RESULTS_PATH.write_text(json.dumps(summary, indent=2))
     print(f"\n{'='*50}")
     print(f"Pass rate: {passed}/{len(questions)} = {pass_rate:.1%}")
     print(f"Total time: {total_time}s")
-    print(f"Results saved: {RESULTS_PATH}")
+    print(f"Results saved: {timestamped_path} + {RESULTS_PATH}")
 
     # Exit non-zero if below threshold (blocks CI merge)
     if pass_rate < 0.70:

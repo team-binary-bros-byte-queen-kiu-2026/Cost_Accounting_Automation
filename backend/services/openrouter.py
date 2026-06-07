@@ -14,7 +14,7 @@ BASE_URL = "https://openrouter.ai/api/v1"
 TIMEOUT = 30.0  # seconds
 
 # Model fallback chain
-PRIMARY_VISION_MODEL   = "google/gemini-2.0-flash"
+PRIMARY_VISION_MODEL   = "google/gemini-3-flash"
 SECONDARY_MODEL        = "anthropic/claude-3-5-haiku"
 TERTIARY_MODEL         = "openai/gpt-4o-mini"
 
@@ -25,7 +25,7 @@ CHAT_FALLBACK_CHAIN = [PRIMARY_CHAT_MODEL, SECONDARY_MODEL, TERTIARY_MODEL]
 
 # Approximate cost per token (USD) — for logging
 COST_MAP = {
-    "google/gemini-2.0-flash":        {"input": 0.10 / 1_000_000, "output": 0.40 / 1_000_000},
+    "google/gemini-3-flash":          {"input": 0.075 / 1_000_000, "output": 0.30 / 1_000_000},
     "anthropic/claude-3-5-haiku":     {"input": 0.80 / 1_000_000, "output": 4.00 / 1_000_000},
     "openai/gpt-4o-mini":             {"input": 0.15 / 1_000_000, "output": 0.60 / 1_000_000},
 }
