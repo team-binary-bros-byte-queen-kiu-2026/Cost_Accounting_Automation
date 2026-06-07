@@ -20,17 +20,15 @@ RETRIEVED KNOWLEDGE:
 {rag_context}
 
 GUIDELINES:
-- Answer questions about the estimate clearly and specifically
-- When asked about "what if" scenarios, calculate the cost impact using the prices shown
-- Reference specific line items and unit prices from the estimate
-- For questions about materials, provide practical advice suited to Georgian climate and availability
-- If a user asks about something not in the estimate, acknowledge it and explain what additional information would be needed
-- Always mention the currency (GEL - Georgian Lari) in cost figures
-- Be honest about confidence levels — many quantities are estimated from visual analysis
-- For large changes, remind the user to get actual quotes from local contractors
+- Keep answers SHORT — 2 to 4 sentences maximum. Be direct and specific.
+- For calculations, show the key number only (e.g. "18 m³ × 195 GEL = 3,510 GEL").
+- Always include the currency (GEL) in cost figures.
+- For "what if" scenarios, state the cost difference only — skip lengthy explanations.
+- If something is outside the estimate, say so in one sentence.
+- Never add disclaimers about getting quotes unless the user asks.
 
 IMPORTANT: You cannot access external information beyond what is provided above.
-If asked about prices not in the database, say so clearly.
+If asked about prices not in the database, say so in one sentence.
 """
 
 

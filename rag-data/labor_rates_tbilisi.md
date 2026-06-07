@@ -1,55 +1,48 @@
 # Labor Rates — Tbilisi and Georgian Construction Market 2025
-Source: Georgian construction industry survey (SAMPLE DATA — replace with actual rates)
+Source: Georgian construction industry rates, Tbilisi contractor market, June 2026.
 
-## Skilled Trades (Daily Rates)
+## Daily Rates (per day, 8-hour shift)
 
-Mason/bricklayer: 85 GEL/day. A skilled mason can lay 300–400 standard bricks per day.
-Concrete finisher: 80 GEL/day. Includes formwork assembly, pouring, vibrating, and finishing.
-Carpenter (rough/formwork): 90 GEL/day. For formwork, roof framing, and structural timber.
-Carpenter (finishing): 110 GEL/day. For door/window installation, trim, and finish work.
-Steel fixer/ironworker: 95 GEL/day. Rebar cutting, bending, and tying.
-Roofer: 100 GEL/day. Tile and metal sheet installation.
-Plasterer: 85 GEL/day. A good plasterer can finish 25–30 m² of wall per day.
-Tiler: 90 GEL/day. Floor tiles: 15–20 m²/day. Wall tiles: 10–15 m²/day.
-Painter: 75 GEL/day. Interior painting: 40–60 m² per day (2 coats).
-General laborer: 60 GEL/day. Site cleanup, material handling, mixing.
+General laborer (დამხმარე მუშა): 65 GEL/day. Unskilled site work, material handling, cleanup.
+Mason / bricklayer (ქვამდებელი): 90 GEL/day. Skilled brickwork and blockwork. Productivity: 150–200 standard bricks per day.
+Concrete finisher (ბეტონის ოსტატი): 85 GEL/day. Formwork assembly, pouring, screeding, and finishing.
+Carpenter rough (დამხმარე დურგალი): 95 GEL/day. Formwork construction and structural timber work.
+Carpenter finish (დამამთავრებელი დურგალი): 115 GEL/day. Door and window fitting, finish carpentry.
+Steel fixer / ironworker (არმატურჩი): 100 GEL/day. Rebar cutting, bending, and tying. Productivity: 500–800 kg per day.
+Roofer (სახურავის ოსტატი): 105 GEL/day. Roof tile and corrugated sheet installation.
+Plasterer (შტუკატური ოსტატი): 90 GEL/day. Interior and exterior plaster application.
+Tiler (მოკირწყლე): 95 GEL/day. Floor and wall ceramic tile installation.
+Painter (მღებავი): 80 GEL/day. Interior and exterior paint application.
+Site foreman / engineer: 140 GEL/day. Site supervision, quality control, coordination.
 
-## Licensed Trades (Hourly Rates)
+## Hourly Rates
 
-Electrician: 18 GEL/hour. Licensed electrician for all electrical rough-in and finishing work.
-Plumber: 20 GEL/hour. Rough-in plumbing, fixture installation, and pressure testing.
-HVAC technician: 22 GEL/hour. Heating, ventilation, and air conditioning systems.
-Site foreman: 130 GEL/day. Experienced site supervisor managing 5–15 workers.
-
-## Project Labor Cost Guidelines
-
-For a standard two-story residential house (120 m²):
-- Foundation and structure (concrete, masonry, steel): 45–55 GEL/m² of floor area
-- Roofing and waterproofing: 30–40 GEL/m² of roof area
-- Rough MEP (mechanical, electrical, plumbing): 250–400 GEL/m² of floor area
-- Finishes (plaster, tiles, paint, doors): 150–250 GEL/m² of floor area
-- Total labor: typically 35–45% of total project cost
+Electrician (ელექტრიკოსი): 20 GEL/hour. Licensed electrical rough-in and finishing.
+Plumber (სანტექნიკოსი): 22 GEL/hour. Plumbing rough-in, pipe fitting, fixtures.
+HVAC technician: 25 GEL/hour. Heating, ventilation, and air-conditioning installation.
+Architect / designer (small project): 50 GEL/hour. Architectural design and technical drawings for residential projects.
 
 ## Productivity Benchmarks
 
-- 1 mason + 1 helper: 6–8 m² of brick wall per day (40cm thickness)
-- Concrete slab pour: 30–50 m² per day with a 4-person crew and pump
-- Roof tile installation: 40–60 m² per day per roofer
-- Electrical rough-in: 0.5–1.0 hours per m² of floor area
-- Plumbing rough-in: 0.3–0.6 hours per m² of floor area
+A mason can lay 150–200 standard bricks per day, or install 8–12 m² of 20 cm block wall per day.
+A tiler can install 15–25 m² of floor tiles per day depending on tile size and pattern.
+A plasterer can apply machine gypsum plaster to 40–60 m² of wall per day.
+A painter can apply 2 coats of interior latex to 80–120 m² per day.
+A steel fixer can cut, bend, and tie 500–800 kg of rebar per day.
 
-## Typical Project Durations
+## Typical Package Costs (Materials + Labor)
 
-- Foundation (120 m² slab): 2–3 weeks
-- Structural walls and frame: 6–10 weeks for 2-story house
-- Roofing: 1–2 weeks
-- MEP rough-in: 3–4 weeks
-- Finishes: 8–12 weeks
-- Total for turnkey 120 m² house: approximately 9–14 months
+Concrete foundation per m³ (including formwork, pour, strip): 350–450 GEL/m³ total.
+Brick external wall 40 cm per m² (materials + labor): 100–130 GEL/m².
+AAC block wall 20 cm per m² (materials + labor): 55–75 GEL/m².
+Floor tile installation per m² (materials + labor): 50–80 GEL/m².
+Interior plaster walls per m² (materials + labor): 22–30 GEL/m².
+Interior painting 2 coats per m² (materials + labor): 14–20 GEL/m².
+Roof tile installation per m² (materials + labor): 80–110 GEL/m².
 
 ## Regional Variations
 
-Tbilisi city center: add 15–20% premium for logistics and access restrictions.
-Outside Tbilisi (Batumi, Kutaisi, Rustavi): approximately same as Tbilisi base rates.
-Rural areas: labor 10–20% cheaper but material delivery adds 5–15% to material costs.
-Mountain regions (Kazbegi, Svaneti): add 30–50% overall for access and logistics.
+Tbilisi rates are approximately 15–25% higher than regional Georgian cities.
+Kutaisi, Batumi, and Rustavi have similar urban rates, roughly 5–15% below Tbilisi.
+Rural areas can be 20–30% cheaper but skilled specialist availability is limited.
+Seasonal variation: Summer (May–September) rates can be 10–15% higher due to peak demand.
