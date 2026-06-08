@@ -254,46 +254,86 @@ def vision_analyze(image_base64: str, prompt: str, session_id: str = "anonymous"
 def stream_chat(messages: list, session_id: str = "anonymous", model: str = PRIMARY_CHAT_MODEL):
     """
     Generator that yields SSE-formatted token chunks.
-    Streams from OpenRouter, logs to episode_log on completion.
+    Tries the fallback chain if the primary model fails before streaming starts.
+    Once tokens are flowing, no mid-stream model switch is possible.
     """
-    payload = {
-        "model": model,
-        "messages": messages,
-        "stream": True,
-    }
-    t0 = time.perf_counter()
-    full_content = ""
-    total_tokens = 0
+    import json as _json
 
-    try:
-        with httpx.Client(timeout=TIMEOUT) as client:
-            with client.stream("POST", f"{BASE_URL}/chat/completions", headers=_headers(), json=payload) as resp:
-                resp.raise_for_status()
-                for line in resp.iter_lines():
-                    if line.startswith("data: "):
-                        chunk = line[6:]
-                        if chunk.strip() == "[DONE]":
-                            yield "data: [DONE]\n\n"
-                            break
-                        try:
-                            import json
-                            data = json.loads(chunk)
-                            delta = data["choices"][0]["delta"].get("content", "")
-                            if delta:
-                                full_content += delta
-                                yield f"data: {json.dumps({'token': delta})}\n\n"
-                        except Exception:
-                            continue
-    finally:
-        latency_ms = int((time.perf_counter() - t0) * 1000)
-        # Approximate token count
-        approx_tokens = len(full_content.split())
-        episode_log.log_llm_call(
-            session_id=session_id,
-            model=model,
-            model_used=model,
-            input_tokens=sum(len(m.get("content", "").split()) for m in messages if isinstance(m.get("content"), str)),
-            output_tokens=approx_tokens,
-            latency_ms=latency_ms,
-            cost_usd=_calc_cost(model, 500, approx_tokens),
-        )
+    chain = [model] + [m for m in CHAT_FALLBACK_CHAIN if m != model]
+    fallback_triggered = False
+    last_error = None
+
+    for idx, current_model in enumerate(chain):
+        if idx > 0:
+            fallback_triggered = True
+        t0 = time.perf_counter()
+        full_content = ""
+        payload = {"model": current_model, "messages": messages, "stream": True}
+
+        try:
+            with httpx.Client(timeout=TIMEOUT) as client:
+                with client.stream("POST", f"{BASE_URL}/chat/completions", headers=_headers(), json=payload) as resp:
+                    resp.raise_for_status()
+                    for line in resp.iter_lines():
+                        if line.startswith("data: "):
+                            chunk = line[6:]
+                            if chunk.strip() == "[DONE]":
+                                yield "data: [DONE]\n\n"
+                                break
+                            try:
+                                data = _json.loads(chunk)
+                                delta = data["choices"][0]["delta"].get("content", "")
+                                if delta:
+                                    full_content += delta
+                                    yield f"data: {_json.dumps({'token': delta})}\n\n"
+                            except Exception:
+                                continue
+
+            # Successful stream — log and return
+            latency_ms = int((time.perf_counter() - t0) * 1000)
+            approx_tokens = len(full_content.split())
+            episode_log.log_llm_call(
+                session_id=session_id,
+                model=model,
+                model_used=current_model,
+                input_tokens=sum(len(m.get("content", "").split()) for m in messages if isinstance(m.get("content"), str)),
+                output_tokens=approx_tokens,
+                latency_ms=latency_ms,
+                cost_usd=_calc_cost(current_model, 500, approx_tokens),
+                fallback_triggered=fallback_triggered,
+            )
+            return
+
+        except httpx.HTTPStatusError as e:
+            last_error = e
+            episode_log.log_llm_call(
+                session_id=session_id,
+                model=model,
+                model_used=current_model,
+                input_tokens=0,
+                output_tokens=0,
+                latency_ms=int((time.perf_counter() - t0) * 1000),
+                cost_usd=0.0,
+                fallback_triggered=fallback_triggered,
+                error=f"HTTP {e.response.status_code}",
+            )
+            continue
+        except Exception as e:
+            last_error = e
+            episode_log.log_llm_call(
+                session_id=session_id,
+                model=model,
+                model_used=current_model,
+                input_tokens=0,
+                output_tokens=0,
+                latency_ms=int((time.perf_counter() - t0) * 1000),
+                cost_usd=0.0,
+                fallback_triggered=fallback_triggered,
+                error=str(e),
+            )
+            continue
+
+    # All models failed
+    import json as _json
+    yield f"data: {_json.dumps({'error': f'All models failed. Last error: {last_error}'})}\n\n"
+    yield "data: [DONE]\n\n"

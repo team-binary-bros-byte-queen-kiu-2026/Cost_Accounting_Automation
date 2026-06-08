@@ -5,6 +5,8 @@ Handles follow-up questions about the cost estimate using session memory + RAG.
 import json
 from ..services import openrouter, session_store, rag
 
+MAX_HISTORY_TURNS = 20  # keep last 20 messages (excl. system prompt) to control token cost
+
 # ── Large system prompt (>1024 tokens) — cached on first call ─────────────
 SYSTEM_PROMPT_TEMPLATE = """You are ConstructAI, an expert construction cost estimation assistant for the Georgian market.
 
@@ -44,13 +46,24 @@ def build_system_prompt(session_id: str) -> str:
     )
 
 
+def _trim_history(history: list) -> list:
+    """Keep system prompt at position 0, trim conversation to last MAX_HISTORY_TURNS messages."""
+    if not history:
+        return history
+    system_messages = [m for m in history if m.get("role") == "system"]
+    conversation = [m for m in history if m.get("role") != "system"]
+    if len(conversation) > MAX_HISTORY_TURNS:
+        conversation = conversation[-MAX_HISTORY_TURNS:]
+    return system_messages + conversation
+
+
 def get_chat_response(session_id: str, user_message: str) -> dict:
     """Non-streaming chat response for programmatic use."""
     system_prompt = build_system_prompt(session_id)
     session_store.init_session(session_id, system_prompt)
     session_store.append_message(session_id, "user", user_message)
 
-    history = session_store.get_history(session_id)
+    history = _trim_history(session_store.get_history(session_id))
     result = openrouter.chat_with_fallback(
         messages=history,
         session_id=session_id,
@@ -65,7 +78,7 @@ def get_chat_stream(session_id: str, user_message: str):
     session_store.init_session(session_id, system_prompt)
     session_store.append_message(session_id, "user", user_message)
 
-    history = session_store.get_history(session_id)
+    history = _trim_history(session_store.get_history(session_id))
     full_response = ""
 
     for chunk in openrouter.stream_chat(messages=history, session_id=session_id):
