@@ -44,6 +44,7 @@ async def speak(request: Request, body: SpeakRequest):
                 "model": "openai/tts-1",
                 "input": body.text,
                 "voice": body.voice,
+                "data_collection": "deny",
             },
             timeout=30.0,
         )

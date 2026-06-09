@@ -38,7 +38,7 @@ def _embed(texts: list[str]) -> list[list[float]]:
             "Authorization": f"Bearer {OPENROUTER_API_KEY}",
             "Content-Type": "application/json",
         },
-        json={"model": EMBED_MODEL, "input": texts},
+        json={"model": EMBED_MODEL, "input": texts, "data_collection": "deny"},
         timeout=15.0,
     )
     resp.raise_for_status()

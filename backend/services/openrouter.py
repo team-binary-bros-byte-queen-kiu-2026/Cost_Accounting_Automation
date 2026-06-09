@@ -3,25 +3,23 @@ OpenRouter unified client.
 Every call has: 30s timeout, exponential-backoff retry (max 3),
 fallback model chain, prompt caching headers, and episode logging.
 """
-import os
 import time
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential
+from ..settings import (
+    OPENROUTER_API_KEY,
+    PRIMARY_VISION_MODEL,
+    PRIMARY_CHAT_MODEL,
+    SECONDARY_MODEL,
+    TERTIARY_MODEL,
+    FALLBACK_CHAIN,
+    CHAT_FALLBACK_CHAIN,
+    OPENROUTER_DATA_COLLECTION,
+)
 from . import episode_log
 
-OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 BASE_URL = "https://openrouter.ai/api/v1"
 TIMEOUT = 30.0  # seconds
-
-# Model fallback chain
-PRIMARY_VISION_MODEL   = "google/gemini-3-flash"
-SECONDARY_MODEL        = "anthropic/claude-3-5-haiku"
-TERTIARY_MODEL         = "openai/gpt-4o-mini"
-
-PRIMARY_CHAT_MODEL     = "anthropic/claude-3-5-haiku"
-
-FALLBACK_CHAIN = [PRIMARY_VISION_MODEL, SECONDARY_MODEL, TERTIARY_MODEL]
-CHAT_FALLBACK_CHAIN = [PRIMARY_CHAT_MODEL, SECONDARY_MODEL, TERTIARY_MODEL]
 
 # Approximate cost per token (USD) — for logging
 COST_MAP = {
@@ -62,7 +60,12 @@ def _is_retryable(exc: BaseException) -> bool:
 )
 def _call_once(model: str, messages: list, **kwargs) -> dict:
     """Single attempt — tenacity retries on timeout or 5xx only."""
-    payload = {"model": model, "messages": messages, **kwargs}
+    payload = {
+        "model": model,
+        "messages": messages,
+        "data_collection": OPENROUTER_DATA_COLLECTION,
+        **kwargs,
+    }
     with httpx.Client(timeout=TIMEOUT) as client:
         resp = client.post(f"{BASE_URL}/chat/completions", headers=_headers(), json=payload)
         resp.raise_for_status()
@@ -268,7 +271,12 @@ def stream_chat(messages: list, session_id: str = "anonymous", model: str = PRIM
             fallback_triggered = True
         t0 = time.perf_counter()
         full_content = ""
-        payload = {"model": current_model, "messages": messages, "stream": True}
+        payload = {
+            "model": current_model,
+            "messages": messages,
+            "stream": True,
+            "data_collection": OPENROUTER_DATA_COLLECTION,
+        }
 
         try:
             with httpx.Client(timeout=TIMEOUT) as client:
