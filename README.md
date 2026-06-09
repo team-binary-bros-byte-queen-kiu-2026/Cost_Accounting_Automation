@@ -128,7 +128,7 @@ Vision:  PRIMARY_VISION_MODEL → SECONDARY_MODEL → OSS_FALLBACK
 Chat:    PRIMARY_MODEL         → SECONDARY_MODEL → OSS_FALLBACK
               │                        │                  │
               ▼                        ▼                  ▼
-     google/gemini-3-flash    claude-3-5-haiku    gpt-4o-mini
+     google/gemini-2.5-flash    claude-3-5-haiku    gpt-4o-mini
 ```
 
 On 429 or 5xx, `chat_with_fallback()` and `stream_chat()` advance to the next model and log `fallback_triggered=true` in the episode log.
@@ -139,7 +139,7 @@ On 429 or 5xx, `chat_with_fallback()` and `stream_chat()` advance to the next mo
 
 | Task | Model | Why | Fallback |
 |---|---|---|---|
-| Image analysis (`/analyze`) | `google/gemini-3-flash` | Strong multimodal accuracy, $0.075/M input, fast enough for upload UX | `anthropic/claude-3-5-haiku` → `openai/gpt-4o-mini` |
+| Image analysis (`/analyze`) | `google/gemini-2.5-flash` | Strong multimodal accuracy, $0.075/M input, best benchmark quality/cost | `anthropic/claude-3-5-haiku` → `openai/gpt-4o-mini` |
 | Streaming chat (`/chat/stream`) | `anthropic/claude-3-5-haiku` | Reliable instruction following for short GEL cost answers | `anthropic/claude-3-5-haiku` (429 failover) → `openai/gpt-4o-mini` |
 | RAG embeddings | `openai/text-embedding-3-small` | Good cosine similarity on construction domain text, $0.02/M tokens | none (local ChromaDB retrieval) |
 | Text-to-speech (`/speak`) | `openai/tts-1` | Low-latency speech via OpenRouter | HTTP 502 to client |
@@ -168,7 +168,7 @@ From `logs/episode-log.jsonl` + `logs/episode_log.jsonl` (153 entries, regenerat
 
 | Task | Model | Avg input tokens | Avg output tokens | Cost per call | Monthly (1000 calls) |
 |---|---|---|---|---|---|
-| Image analysis | gemini-3-flash | ~1,200 | ~800 | ~$0.00036 | ~$0.36 |
+| Image analysis | gemini-2.5-flash | ~1,200 | ~800 | ~$0.00036 | ~$0.36 |
 | Chat response | claude-3-5-haiku | ~2,500 | ~400 | ~$0.0036 | ~$3.60 |
 | Embedding | text-embedding-3-small | ~300 | — | ~$0.000006 | ~$0.006 |
 
@@ -195,6 +195,7 @@ From `logs/episode-log.jsonl` + `logs/episode_log.jsonl` (153 entries, regenerat
 ```bash
 # Start backend first, then:
 python eval/run_eval.py
+python eval/run_model_comparison.py   # Lab 11 benchmark → eval/model-comparison.json
 # Must score ≥ 70% to pass CI
 ```
 

@@ -23,7 +23,7 @@ TIMEOUT = 30.0  # seconds
 
 # Approximate cost per token (USD) — for logging
 COST_MAP = {
-    "google/gemini-3-flash":          {"input": 0.075 / 1_000_000, "output": 0.30 / 1_000_000},
+    "google/gemini-2.5-flash":          {"input": 0.075 / 1_000_000, "output": 0.30 / 1_000_000},
     "anthropic/claude-3-5-haiku":     {"input": 0.80 / 1_000_000, "output": 4.00 / 1_000_000},
     "openai/gpt-4o-mini":             {"input": 0.15 / 1_000_000, "output": 0.60 / 1_000_000},
 }
