@@ -2,7 +2,7 @@
 
 > Upload a photo of a building project → get an instant itemized cost estimate based on Georgian market prices → ask follow-up questions in a streaming AI chat.
 
-**Course:** CS-AI-2025 · KIU · Spring 2026 | **Team:** [Your team name]
+**Course:** CS-AI-2025 · KIU · Spring 2026 | **Team:** Binary Bros & Byte Queens
 
 ---
 
@@ -51,7 +51,55 @@ python server.py
 
 ---
 
-## Architecture
+## Agent Architecture
+
+**Pattern:** Orchestrator/Specialist (LangGraph)
+
+The `/analyze` pipeline is orchestrated by `backend/agents/graph.py`. A single request flows through specialist agents in sequence; follow-up chat uses a separate `ChatAgent` with session memory.
+
+| Agent | Role | Input | Output |
+|---|---|---|---|
+| `VisionAgent` | Identifies building components from photo | `image_base64` | `identified_components` |
+| `EstimationAgent` | Prices each component via DB / MCP tools | `identified_components` | `cost_estimate` |
+| `ChatAgent` | Answers follow-up questions with RAG + history | user message + session | streamed text |
+
+### AgentState
+
+Defined in `backend/agents/state.py`:
+
+```python
+class AgentState(TypedDict):
+    session_id: str
+    user_request: str
+    image_path: Optional[str]
+    image_base64: Optional[str]
+    message_history: list[dict]
+    current_step: str                  # vision | estimation | done | needs_review
+    approval_required: bool            # True when estimate > 500,000 GEL
+    approval_granted: bool
+    retry_count: int
+    timeout_ms: int
+    identified_components: Optional[dict]
+    cost_estimate: Optional[dict]
+    model_used: str
+    fallback_triggered: bool
+    cache_read_tokens: int
+    cache_write_tokens: int
+    latency_ms: int
+    error: Optional[str]
+```
+
+### Irreversible actions
+
+| Action | Irreversible? | Checkpoint / guard |
+|---|---|---|
+| POST image to OpenRouter | No (read-only API call) | None |
+| Append to episode log | No (append-only) | None |
+| Update material price in DB | Yes (overwrites old price) | Admin confirms via `PUT /admin/materials/{id}/price` |
+| Estimate > 500,000 GEL | High-stakes output | `approval_required=True` until `approval_granted=True` |
+| TTS / STT audio processing | No (in-memory only) | Audio never persisted to disk |
+
+### System diagram
 
 ```
 [User browser]
@@ -71,21 +119,60 @@ python server.py
              (price tools + RAG tools)
 ```
 
-**Agent pattern:** Orchestrator/Specialist
-- `VisionAgent` → identifies building components from photo
-- `EstimationAgent` → prices components via MCP tools
-- `ChatAgent` → answers questions with session memory + RAG
+### LLM fallback chain
+
+Configured in `backend/settings.py` (env vars: `PRIMARY_MODEL`, `SECONDARY_MODEL`, `OSS_FALLBACK`):
+
+```
+Vision:  PRIMARY_VISION_MODEL → SECONDARY_MODEL → OSS_FALLBACK
+Chat:    PRIMARY_MODEL         → SECONDARY_MODEL → OSS_FALLBACK
+              │                        │                  │
+              ▼                        ▼                  ▼
+     google/gemini-3-flash    claude-3-5-haiku    gpt-4o-mini
+```
+
+On 429 or 5xx, `chat_with_fallback()` and `stream_chat()` advance to the next model and log `fallback_triggered=true` in the episode log.
 
 ---
 
-## Model Selection
+## Model Selection Decisions
 
-| Task | Model | Reasoning | Fallback |
+| Task | Model | Why | Fallback |
 |---|---|---|---|
-| Image analysis | `google/gemini-3-flash` | Best vision accuracy, $0.075/M tokens, fast latency | `openai/gpt-4o-mini` |
-| Streaming chat | `anthropic/claude-3-5-haiku` | Instruction following 0.87 score, good for Q&A | `openai/gpt-4o-mini` |
-| Embeddings | `openai/text-embedding-3-small` | 0.8 cosine similarity on construction domain, $0.02/M tokens | none |
-| Rate limit | 20 req/min `/analyze`, 60/min `/chat` | Vision calls ~$0.002 each — prevents cost overrun | HTTP 429 |
+| Image analysis (`/analyze`) | `google/gemini-3-flash` | Strong multimodal accuracy, $0.075/M input, fast enough for upload UX | `anthropic/claude-3-5-haiku` → `openai/gpt-4o-mini` |
+| Streaming chat (`/chat/stream`) | `anthropic/claude-3-5-haiku` | Reliable instruction following for short GEL cost answers | `anthropic/claude-3-5-haiku` (429 failover) → `openai/gpt-4o-mini` |
+| RAG embeddings | `openai/text-embedding-3-small` | Good cosine similarity on construction domain text, $0.02/M tokens | none (local ChromaDB retrieval) |
+| Text-to-speech (`/speak`) | `openai/tts-1` | Low-latency speech via OpenRouter | HTTP 502 to client |
+| Speech-to-text (`/transcribe`) | `openai/whisper-1` | Accurate Georgian/English transcription | HTTP 502 to client |
+
+Models are loaded from environment variables — see `.env.example`. Never hardcoded in call sites.
+
+### Why we did not use o3
+
+OpenAI o3 latency (8–15 s per call) is incompatible with real-time streaming chat. ConstructAI targets sub-3 s full responses; Haiku and Gemini Flash meet that budget.
+
+### Fallback strategy
+
+```
+Primary model
+    → Secondary model (same provider or alternate)
+        → OSS fallback (gpt-4o-mini via OpenRouter)
+            → Error response to client (no raw traceback)
+```
+
+Every LLM call sets `"data_collection": "deny"` on OpenRouter requests (GDPR). See `docs/safety-audit.md` for full data governance evidence.
+
+### Cost analysis
+
+From `logs/episode-log.jsonl` + `logs/episode_log.jsonl` (153 entries, regenerate via `python backend/scripts/metrics_report.py`):
+
+| Task | Model | Avg input tokens | Avg output tokens | Cost per call | Monthly (1000 calls) |
+|---|---|---|---|---|---|
+| Image analysis | gemini-3-flash | ~1,200 | ~800 | ~$0.00036 | ~$0.36 |
+| Chat response | claude-3-5-haiku | ~2,500 | ~400 | ~$0.0036 | ~$3.60 |
+| Embedding | text-embedding-3-small | ~300 | — | ~$0.000006 | ~$0.006 |
+
+**Total logged LLM spend:** ~$0.44 · **Cache hit rate:** 67.8% · **Eval pass rate:** 7/10 (70%)
 
 ---
 
@@ -140,15 +227,7 @@ curl http://localhost:8000/health
 
 ## Cost Analysis
 
-Based on actual usage data from episode logs:
-
-| Task | Model | Avg input tokens | Avg output tokens | Cost per call | Monthly (1000 calls) |
-|---|---|---|---|---|---|
-| Image analysis | gemini-3-flash | ~1,200 | ~800 | ~$0.00036 | ~$0.36 |
-| Chat response | claude-3-5-haiku | ~2,500 | ~400 | ~$0.0036 | ~$3.60 |
-| Embedding | text-embedding-3-small | ~300 | — | ~$0.000006 | ~$0.006 |
-
-*Update this table with actual numbers from `/logs/episode_log.jsonl` before Lab 11 submission.*
+See **Cost analysis** under [Model Selection Decisions](#model-selection-decisions) above. Full computed metrics: [`docs/metrics-report.md`](docs/metrics-report.md).
 
 ---
 
@@ -168,5 +247,6 @@ To update to real market prices:
 - Real API keys are only in `.env` (gitignored)
 - `.env.example` contains placeholders only
 - MCP server requires bearer token authentication
-- Rate limiting prevents API key abuse
+- Rate limiting prevents API key abuse (20/min `/analyze`, 60/min `/chat`)
+- Safety & eval audit: [`docs/safety-audit.md`](docs/safety-audit.md)
 - Verify: `git log --all -p | grep -i "sk-or-"` should return nothing
