@@ -27,7 +27,7 @@ async def transcribe(request: Request, file: UploadFile = File(...)):
             "https://openrouter.ai/api/v1/audio/transcriptions",
             headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"},
             files={"file": (file.filename or "audio.mp3", audio_bytes, file.content_type or "audio/mpeg")},
-            data={"model": "openai/whisper-1"},
+            data={"model": "openai/whisper-1", "data_collection": "deny"},
             timeout=60.0,
         )
         resp.raise_for_status()
