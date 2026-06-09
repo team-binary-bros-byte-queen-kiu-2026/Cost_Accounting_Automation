@@ -12,7 +12,7 @@ SECONDARY_MODEL = os.environ.get("SECONDARY_MODEL", "anthropic/claude-3-5-haiku"
 OSS_FALLBACK = os.environ.get("OSS_FALLBACK", "openai/gpt-4o-mini")
 
 # Vision (multimodal) — separate primary, same secondary / OSS fallback
-PRIMARY_VISION_MODEL = os.environ.get("PRIMARY_VISION_MODEL", "google/gemini-3-flash")
+PRIMARY_VISION_MODEL = os.environ.get("PRIMARY_VISION_MODEL", "google/gemini-2.5-flash")
 
 # Aliases used across the codebase
 PRIMARY_CHAT_MODEL = PRIMARY_MODEL
