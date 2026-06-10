@@ -101,6 +101,8 @@ class AgentState(TypedDict):
 
 ### System diagram
 
+Full interactive diagram: [docs/architecture-diagram.html](docs/architecture-diagram.html) | [docs/architecture-diagram.drawio](docs/architecture-diagram.drawio)
+
 ```
 [User browser]
     │  Upload image / send message

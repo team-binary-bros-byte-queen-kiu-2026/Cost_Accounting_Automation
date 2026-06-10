@@ -286,6 +286,7 @@ def stream_chat(messages: list, session_id: str = "anonymous", model: str = PRIM
                         if line.startswith("data: "):
                             chunk = line[6:]
                             if chunk.strip() == "[DONE]":
+                                yield f"data: {_json.dumps({'model_used': current_model, 'fallback_triggered': fallback_triggered})}\n\n"
                                 yield "data: [DONE]\n\n"
                                 break
                             try:

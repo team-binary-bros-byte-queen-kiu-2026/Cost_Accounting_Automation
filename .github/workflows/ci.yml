@@ -58,11 +58,12 @@ jobs:
           curl -f http://localhost:8000/health || (echo "❌ Backend failed to start" && exit 1)
           echo "✅ Backend is up"
 
-      - name: Run golden set evaluation
+      - name: Run golden set evaluation (threshold 0.70 — exits non-zero if below)
         env:
           BACKEND_URL: http://localhost:8000
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: python eval/run_eval.py
+        # eval/run_eval.py calls sys.exit(1) if pass_rate < 0.70, blocking the merge
 
       - name: Upload evaluation results
         uses: actions/upload-artifact@v4
