@@ -1,23 +1,23 @@
 # Team Contract — ConstructAI
 **Course:** CS-AI-2025 · Building AI-Powered Applications · Spring 2026
-**Team Name:** [Your team name]
-**Date:** [Date]
+**Team Name:** Binary Bros & Byte Queens
+**Date:** 9 June 2026
 
 ## Team Members
 
 | Name | Student ID | Role | GitHub username |
 |------|-----------|------|----------------|
-| [Member 1] | | Team Lead / Backend | |
-| [Member 2] | | Frontend / UX | |
-| [Member 3] | | AI / MCP / RAG | |
-| [Member 4] | | DevOps / Testing | |
+| Guga | | System Architecture & DevOps | |
+| Nikoloz | | Backend | |
+| Anastasia | | Product, UX & Business / Compliance | |
+| Ilo | | Frontend / AI & MCP | |
 
 ## Responsibilities
 
-- **Team Lead / Backend:** FastAPI app, agents, OpenRouter integration, episode logging
-- **Frontend / UX:** Next.js pages, components, design
-- **AI / MCP / RAG:** MCP server, ChromaDB ingestion, model benchmarking, safety audit
-- **DevOps / Testing:** CI/CD pipeline, Docker, golden set evaluation, repository review compliance
+- **Backend:** FastAPI app, agents, OpenRouter integration, episode logging
+- **System Architecture & DevOps:** CI/CD pipeline, Docker, repository review compliance, infrastructure
+- **Product, UX & Business:** Next.js pages, components, design, compliance requirements
+- **Frontend / AI & MCP:** MCP server, ChromaDB ingestion, model benchmarking, safety audit, frontend features
 
 ## Ground Rules
 
@@ -33,7 +33,7 @@
 
 By pushing to this repository, all members agree to this contract.
 
-- [ ] [Member 1] — _______________________
-- [ ] [Member 2] — _______________________
-- [ ] [Member 3] — _______________________
-- [ ] [Member 4] — _______________________
+- [ ] Guga — _______________________
+- [ ] Nikoloz — _______________________
+- [ ] Anastasia — _______________________
+- [ ] Ilo — _______________________

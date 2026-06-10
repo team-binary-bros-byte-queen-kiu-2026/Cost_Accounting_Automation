@@ -10,8 +10,8 @@
 
 ### 1. Clone and set up environment
 ```bash
-git clone <your-repo-url>
-cd construct-ai
+git clone https://github.com/team-binary-bros-byte-queen-kiu-2026/Cost_Accounting_Automation.git
+cd Cost_Accounting_Automation
 cp .env.example .env
 # Edit .env: add OPENROUTER_API_KEY and MCP_BEARER_TOKEN
 ```
@@ -240,6 +240,11 @@ To update to real market prices:
 2. Edit any price and click Save
 3. Or: edit the values in `seed_prices.py` and re-run it
 4. Or: update `rag-data/*.md` and re-run `python rag-data/ingest.py`
+
+---
+
+## Demo Video
+
 
 ---
 
