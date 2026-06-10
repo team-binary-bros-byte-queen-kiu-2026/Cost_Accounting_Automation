@@ -37,6 +37,13 @@ def init_session(session_id: str, system_prompt: str):
         _store[session_id]["messages"] = [{"role": "system", "content": system_prompt}]
 
 
+def set_system_prompt(session_id: str, system_prompt: str):
+    """Replace system message so estimate/context stays current after client resync."""
+    history = _store[session_id]["messages"]
+    non_system = [m for m in history if m.get("role") != "system"]
+    _store[session_id]["messages"] = [{"role": "system", "content": system_prompt}] + non_system
+
+
 def clear_session(session_id: str):
     del _store[session_id]
 

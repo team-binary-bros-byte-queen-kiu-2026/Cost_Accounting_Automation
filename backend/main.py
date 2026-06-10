@@ -3,12 +3,13 @@ ConstructAI — FastAPI backend entry point.
 Run: uvicorn backend.main:app --reload --port 8000
 """
 import os
+from pathlib import Path
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 from .routers import health, analyze, chat, speak, transcribe, admin
 from .database.seed_prices import seed as seed_db

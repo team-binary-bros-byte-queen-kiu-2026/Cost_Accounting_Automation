@@ -57,10 +57,13 @@ def _trim_history(history: list) -> list:
     return system_messages + conversation
 
 
-def get_chat_response(session_id: str, user_message: str) -> dict:
+def get_chat_response(session_id: str, user_message: str, estimate: dict | None = None) -> dict:
     """Non-streaming chat response for programmatic use."""
+    if estimate:
+        session_store.set_estimate(session_id, estimate)
     system_prompt = build_system_prompt(session_id)
     session_store.init_session(session_id, system_prompt)
+    session_store.set_system_prompt(session_id, system_prompt)
     session_store.append_message(session_id, "user", user_message)
 
     history = _trim_history(session_store.get_history(session_id))
@@ -72,10 +75,13 @@ def get_chat_response(session_id: str, user_message: str) -> dict:
     return result
 
 
-def get_chat_stream(session_id: str, user_message: str):
+def get_chat_stream(session_id: str, user_message: str, estimate: dict | None = None):
     """Generator yielding SSE chunks for streaming response."""
+    if estimate:
+        session_store.set_estimate(session_id, estimate)
     system_prompt = build_system_prompt(session_id)
     session_store.init_session(session_id, system_prompt)
+    session_store.set_system_prompt(session_id, system_prompt)
     session_store.append_message(session_id, "user", user_message)
 
     history = _trim_history(session_store.get_history(session_id))

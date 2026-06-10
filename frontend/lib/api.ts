@@ -31,12 +31,17 @@ export async function streamChat(
   sessionId: string,
   message: string,
   onToken: (token: string) => void,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  estimate?: Record<string, unknown> | null
 ): Promise<void> {
   const resp = await fetch(`${API}/chat/stream`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ session_id: sessionId, message }),
+    body: JSON.stringify({
+      session_id: sessionId,
+      message,
+      estimate: estimate ?? undefined,
+    }),
     signal,
   });
   if (!resp.ok || !resp.body) throw new Error(`Chat failed (${resp.status})`);
@@ -84,7 +89,11 @@ export async function transcribeAudio(blob: Blob): Promise<string> {
   const form = new FormData();
   form.append("file", blob, "recording.webm");
   const resp = await fetch(`${API}/transcribe`, { method: "POST", body: form });
-  if (!resp.ok) throw new Error(`Transcription failed (${resp.status})`);
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    const detail = typeof err.detail === "string" ? err.detail : `HTTP ${resp.status}`;
+    throw new Error(detail);
+  }
   const data = await resp.json();
   return data.transcript || "";
 }

@@ -20,7 +20,13 @@ function ThinkingDots() {
   );
 }
 
-export default function ChatStream({ sessionId }: { sessionId: string }) {
+export default function ChatStream({
+  sessionId,
+  estimate,
+}: {
+  sessionId: string;
+  estimate: Record<string, unknown>;
+}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -50,16 +56,22 @@ export default function ChatStream({ sessionId }: { sessionId: string }) {
     abortRef.current = ctrl;
 
     try {
-      await streamChat(sessionId, text, (token) => {
-        setMessages((prev) => {
-          const updated = [...prev];
-          updated[updated.length - 1] = {
-            ...updated[updated.length - 1],
-            content: updated[updated.length - 1].content + token,
-          };
-          return updated;
-        });
-      }, ctrl.signal);
+      await streamChat(
+        sessionId,
+        text,
+        (token) => {
+          setMessages((prev) => {
+            const updated = [...prev];
+            updated[updated.length - 1] = {
+              ...updated[updated.length - 1],
+              content: updated[updated.length - 1].content + token,
+            };
+            return updated;
+          });
+        },
+        ctrl.signal,
+        estimate
+      );
     } catch (err: unknown) {
       if (err instanceof Error && err.name !== "AbortError") {
         setMessages((prev) => {
@@ -127,7 +139,10 @@ export default function ChatStream({ sessionId }: { sessionId: string }) {
       {/* Input row */}
       <div className="flex gap-2 items-center">
         <VoiceInput
-          onTranscript={(t) => { setVoiceProcessing(false); setInput(t); }}
+          onTranscript={(t) => {
+            setVoiceProcessing(false);
+            send(t);
+          }}
           onProcessingChange={setVoiceProcessing}
           disabled={streaming}
         />
