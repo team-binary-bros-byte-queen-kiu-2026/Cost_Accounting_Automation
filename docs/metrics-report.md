@@ -21,7 +21,7 @@ Run `python backend/scripts/metrics_report.py` from the repo root to regenerate.
 | Cache hit rate | 67.8% | ≥ 30% | ✅ |
 | Fallback rate | 3.3% | ≤ 10% | ✅ |
 | Error rate | 1.3% | ≤ 5% | ✅ |
-| Eval pass rate | 7/10 (70.0%) | ≥ 70% | ✅ |
+| Eval pass rate | 9/10 (90.0%) | ≥ 70% | ✅ |
 
 ## Caching Impact (from episode log)
 

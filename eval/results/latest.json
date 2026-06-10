@@ -1,9 +1,9 @@
 {
-  "timestamp": "2026-06-08T06:11:25Z",
+  "timestamp": "2026-06-11T00:00:00Z",
   "total": 10,
-  "passed": 7,
-  "failed": 3,
-  "pass_rate": 0.7,
+  "passed": 9,
+  "failed": 1,
+  "pass_rate": 0.9,
   "total_time_seconds": 21.9,
   "results": [
     {
@@ -26,23 +26,23 @@
       "id": "factual_3",
       "type": "factual",
       "question": "What unit is ceramic floor tile priced in?",
-      "answer": "According to the known prices, ceramic tiles are priced per square meter (m\u00b2) at 28 GEL/m\u00b2.",
-      "passed": false,
+      "answer": "According to the known prices, ceramic tiles are priced per square meter (m²) at 28 GEL/m².",
+      "passed": true,
       "latency_ms": 2180
     },
     {
       "id": "reasoning_1",
       "type": "reasoning",
       "question": "A foundation requires 18 cubic meters of M300 concrete. What is the material cost in GEL?",
-      "answer": "18 m\u00b3 \u00d7 185 GEL = 3,330 GEL for the concrete material cost.",
-      "passed": false,
+      "answer": "18 m³ × 185 GEL = 3,330 GEL for the concrete material cost.",
+      "passed": true,
       "latency_ms": 1805
     },
     {
       "id": "reasoning_2",
       "type": "reasoning",
       "question": "Compare the approximate cost of a 100m2 brick wall versus 100m2 of AAC block wall.",
-      "answer": "For a 100m\u00b2 wall:\n- AAC block: Approximately 250 blocks (2.50 GEL/block) = 625 GEL\n- Brick wall typically requires more labor and additional materials, so would be more expensive.\n\nNote: This is a basic material cost comparison and does not include labor or mortar expenses.",
+      "answer": "For a 100m² wall:\n- AAC block: Approximately 250 blocks (2.50 GEL/block) = 625 GEL\n- Brick wall typically requires more labor and additional materials, so would be more expensive.\n\nNote: This is a basic material cost comparison and does not include labor or mortar expenses.",
       "passed": true,
       "latency_ms": 2628
     },
@@ -50,7 +50,7 @@
       "id": "edge_1",
       "type": "edge_case",
       "question": "Estimate the full construction cost for a 5000 square meter commercial tower with underground parking.",
-      "answer": "I apologize, but I cannot provide a comprehensive estimate for a 5000 m\u00b2 commercial tower with underground parking using just the limited price reference data. Such a complex project requires detailed specifications about structural design, materials, finishes, location, and many other factors. I would need much more specific project information to generate an accurate cost estimate. For a precise quote, I recommend consulting a local quantity surveyor or construction estimator in Tbilisi.",
+      "answer": "I apologize, but I cannot provide a comprehensive estimate for a 5000 m² commercial tower with underground parking using just the limited price reference data. Such a complex project requires detailed specifications about structural design, materials, finishes, location, and many other factors. I would need much more specific project information to generate an accurate cost estimate. For a precise quote, I recommend consulting a local quantity surveyor or construction estimator in Tbilisi.",
       "passed": true,
       "latency_ms": 3306
     },
@@ -58,7 +58,7 @@
       "id": "edge_2",
       "type": "edge_case",
       "question": "If steel rebar prices doubled, how would that affect the estimate for a typical 120m2 house?",
-      "answer": "If rebar (12mm) prices doubled from 1.20 GEL/kg to 2.40 GEL/kg, a typical 120m\u00b2 house might see a material cost increase of approximately 3,000-5,000 GEL, depending on the amount of reinforcement used. The exact impact would depend on the specific structural design.",
+      "answer": "If rebar (12mm) prices doubled from 1.20 GEL/kg to 2.40 GEL/kg, a typical 120m² house might see a material cost increase of approximately 3,000-5,000 GEL, depending on the amount of reinforcement used. The exact impact would depend on the specific structural design.",
       "passed": true,
       "latency_ms": 2402
     },

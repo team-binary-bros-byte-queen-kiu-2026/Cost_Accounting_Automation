@@ -25,7 +25,16 @@ Answer questions about construction costs using these prices."""
 
 def check_answer(answer: str, question: dict) -> bool:
     """Returns True if the answer passes the question's criteria."""
-    answer_lower = answer.lower()
+    # Normalise before matching:
+    #   - remove thousands-separator commas so "3,330" matches "3330"
+    #   - map unicode superscripts to ASCII so "m²" matches "m2", "m³" matches "m3"
+    answer_normalised = (
+        answer
+        .replace(",", "")
+        .replace("²", "2")
+        .replace("³", "3")
+    )
+    answer_lower = answer_normalised.lower()
 
     # Check required terms
     for term in question.get("expected_contains", []):

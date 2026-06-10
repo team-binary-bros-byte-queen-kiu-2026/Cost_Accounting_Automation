@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ConstructAI — Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    background: #f5f5f0;
+    color: #1a1a1a;
+    padding: 48px 32px;
+  }
+
+  header {
+    max-width: 860px;
+    margin: 0 auto 40px;
+    border-bottom: 2px solid #1a1a1a;
+    padding-bottom: 16px;
+  }
+  header h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  header p {
+    font-size: 0.78rem;
+    color: #666;
+    margin-top: 4px;
+  }
+
+  /* ── MAIN CANVAS ── */
+  .canvas {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  /* ── SECTION LABELS ── */
+  .section-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #888;
+    margin-bottom: 10px;
+  }
+
+  /* ── BOXES ── */
+  .box {
+    border: 1.5px solid #1a1a1a;
+    border-radius: 4px;
+    padding: 10px 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #fff;
+    line-height: 1.3;
+  }
+  .box .sub {
+    font-weight: 400;
+    font-size: 0.7rem;
+    color: #666;
+    margin-top: 2px;
+    display: block;
+  }
+  .box-gray   { background: #f0f0eb; }
+  .box-dark   { background: #1a1a1a; color: #fff; }
+  .box-dashed { border-style: dashed; background: #fafaf7; }
+
+  /* ── ARROWS via SVG ── */
+  svg.arrows {
+    display: block;
+    overflow: visible;
+  }
+
+  /* ── FLOW LAYOUT ── */
+
+  /* Row: horizontal group */
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* Vertical connector */
+  .v-line {
+    width: 1px;
+    background: #1a1a1a;
+    margin: 0 auto;
+    position: relative;
+  }
+  .v-line.arrow::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #1a1a1a;
+  }
+
+  /* Horizontal connector */
+  .h-line {
+    height: 1px;
+    background: #1a1a1a;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .h-line.arrow::after {
+    content: '';
+    position: absolute;
+    right: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 6px solid #1a1a1a;
+  }
+  .h-line.arrow-left::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-right: 6px solid #1a1a1a;
+  }
+
+  /* ── PIPELINE BOX ── */
+  .pipeline {
+    border: 1.5px solid #1a1a1a;
+    border-radius: 4px;
+    padding: 20px;
+    background: #fafaf7;
+    position: relative;
+  }
+  .pipeline-title {
+    position: absolute;
+    top: -10px;
+    left: 12px;
+    background: #f5f5f0;
+    padding: 0 6px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #444;
+  }
+
+  /* ── DECISION BOX ── */
+  .decision {
+    border: 1.5px solid #1a1a1a;
+    transform: rotate(45deg);
+    width: 64px;
+    height: 64px;
+    background: #fff;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .decision-text {
+    transform: rotate(-45deg);
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  /* ── SIDE SERVICES ── */
+  .side-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 140px;
+  }
+  .service-box {
+    border: 1px solid #bbb;
+    border-radius: 3px;
+    padding: 7px 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: #fff;
+    color: #333;
+    line-height: 1.3;
+  }
+  .service-box .sub {
+    font-weight: 400;
+    font-size: 0.66rem;
+    color: #888;
+    margin-top: 2px;
+    display: block;
+  }
+
+  /* ── STEP TABLE ── */
+  .step-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    margin-top: 32px;
+  }
+  .step-table th {
+    text-align: left;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #888;
+    border-bottom: 1.5px solid #1a1a1a;
+    padding: 6px 10px;
+  }
+  .step-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #ddd;
+    vertical-align: top;
+    color: #333;
+  }
+  .step-table td:first-child {
+    font-weight: 700;
+    color: #1a1a1a;
+    white-space: nowrap;
+    width: 30px;
+  }
+  .step-table td:nth-child(2) {
+    font-weight: 600;
+    color: #1a1a1a;
+    width: 160px;
+    white-space: nowrap;
+  }
+  .step-table tr:last-child td { border-bottom: none; }
+
+  code {
+    font-family: 'SF Mono', 'Fira Mono', monospace;
+    font-size: 0.75em;
+    background: #e8e8e3;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: #1a1a1a;
+  }
+
+  /* ── SPACERS ── */
+  .gap4  { height: 4px; }
+  .gap8  { height: 8px; }
+  .gap12 { height: 12px; }
+  .gap16 { height: 16px; }
+  .gap24 { height: 24px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ConstructAI — System Architecture</h1>
+  <p>Upload a building photo → get an itemized GEL cost estimate → ask follow-up questions in streaming chat</p>
+</header>
+
+<div class="canvas">
+
+  <!-- ── USER ── -->
+  <div style="display:flex; justify-content:center;">
+    <div class="box box-gray" style="width:200px; text-align:center;">
+      User
+      <span class="sub">Desktop browser</span>
+    </div>
+  </div>
+
+  <div class="v-line arrow" style="height:24px; width:1px; margin:0 auto;"></div>
+
+  <!-- ── FRONTEND ── -->
+  <div style="display:flex; justify-content:center;">
+    <div class="box" style="width:260px; text-align:center;">
+      Next.js 14 Frontend
+      <span class="sub">localhost:3000</span>
+    </div>
+  </div>
+
+  <div class="v-line arrow" style="height:24px; width:1px; margin:0 auto;"></div>
+
+  <!-- ── API ── -->
+  <div style="display:flex; justify-content:center;">
+    <div class="box box-dark" style="width:260px; text-align:center;">
+      POST /analyze
+      <span class="sub" style="color:#aaa;">FastAPI · :8000 · 20 req/min</span>
+    </div>
+  </div>
+
+  <div class="v-line arrow" style="height:24px; width:1px; margin:0 auto;"></div>
+
+  <!-- ══ LANGGRAPH PIPELINE ══ -->
+  <div class="pipeline">
+    <span class="pipeline-title">LangGraph Pipeline — backend/agents/graph.py</span>
+
+    <!-- Vision agent row -->
+    <div style="display:flex; align-items:center; gap:16px;">
+      <div style="flex:1;">
+        <div class="box" style="text-align:center;">
+          VisionAgent
+          <span class="sub">Identify building components from image</span>
+        </div>
+      </div>
+      <div class="h-line arrow" style="width:40px;"></div>
+      <div class="side-col" style="min-width:160px;">
+        <div class="service-box">
+          OpenRouter
+          <span class="sub">gemini-2.5-flash</span>
+        </div>
+        <div class="service-box" style="font-size:0.66rem; color:#888; border-color:#ddd;">
+          Returns: building type,<br>components[], quantities
+        </div>
+      </div>
+    </div>
+
+    <!-- Fallback note -->
+    <div style="font-size:0.66rem; color:#888; text-align:right; margin-top:4px;">
+      fallback: claude-3-5-haiku → gpt-4o-mini
+    </div>
+
+    <div class="v-line arrow" style="height:20px; width:1px; margin:8px auto;"></div>
+
+    <!-- Estimation agent row -->
+    <div style="display:flex; align-items:center; gap:16px;">
+      <div style="flex:1;">
+        <div class="box" style="text-align:center;">
+          EstimationAgent
+          <span class="sub">Price each component · add 35% labor</span>
+        </div>
+      </div>
+      <div class="h-line arrow" style="width:40px;"></div>
+      <div class="side-col" style="min-width:160px;">
+        <div class="service-box">
+          SQLite DB
+          <span class="sub">material prices (GEL)</span>
+        </div>
+        <div class="service-box">
+          MCP Server :8001
+          <span class="sub">get_material_price tool</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="v-line arrow" style="height:20px; width:1px; margin:8px auto;"></div>
+
+    <!-- Decision gate -->
+    <div style="display:flex; flex-direction:column; align-items:center; gap:0;">
+      <div style="display:flex; align-items:center; gap:0; position:relative;">
+        <div class="decision">
+          <div class="decision-text">&gt; 500k<br>GEL?</div>
+        </div>
+      </div>
+
+      <!-- Branch row -->
+      <div style="display:flex; gap:64px; margin-top:16px; align-items:flex-start;">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+          <span style="font-size:0.66rem; color:#888;">YES</span>
+          <div class="box" style="min-width:140px; text-align:center; border-style:dashed;">
+            HumanReview node
+            <span class="sub">append warning note<br>approval_required = true</span>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+          <span style="font-size:0.66rem; color:#888;">NO</span>
+          <div class="box box-gray" style="min-width:100px; text-align:center;">
+            done
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end pipeline -->
+
+  <div class="v-line arrow" style="height:24px; width:1px; margin:0 auto;"></div>
+
+  <!-- ── SESSION STORE ── -->
+  <div style="display:flex; justify-content:center;">
+    <div class="box" style="width:320px; text-align:center;">
+      SessionStore
+      <span class="sub">in-memory · estimate + chat history · keyed by session_id (UUID)</span>
+    </div>
+  </div>
+
+  <div class="v-line arrow" style="height:24px; width:1px; margin:0 auto;"></div>
+
+  <!-- ── REPORT ── -->
+  <div style="display:flex; justify-content:center;">
+    <div class="box box-gray" style="width:260px; text-align:center;">
+      Itemized Cost Report
+      <span class="sub">Displayed in browser · line items + grand total GEL</span>
+    </div>
+  </div>
+
+  <!-- ── CHAT FORK ── -->
+  <div style="border-top:1px dashed #bbb; margin: 32px 0 0; padding-top: 24px;">
+    <div class="section-label">Chat flow — same session_id, user asks follow-up</div>
+
+    <div style="display:flex; justify-content:center;">
+      <div class="box box-dark" style="width:280px; text-align:center;">
+        POST /chat/stream
+        <span class="sub" style="color:#aaa;">SSE · 60 req/min · max msg 2000 chars</span>
+      </div>
+    </div>
+
+    <div class="v-line arrow" style="height:24px; width:1px; margin:0 auto;"></div>
+
+    <!-- ChatAgent row -->
+    <div style="display:flex; align-items:flex-start; justify-content:center; gap:16px;">
+      <div style="width:260px;">
+        <div class="box" style="text-align:center;">
+          ChatAgent
+          <span class="sub">chat_agent.py · session memory · max 20 turns</span>
+        </div>
+      </div>
+      <div class="h-line arrow" style="width:40px; margin-top:18px;"></div>
+      <div class="side-col" style="min-width:160px;">
+        <div class="service-box">SessionStore<span class="sub">load estimate + history</span></div>
+        <div class="service-box">ChromaDB (RAG)<span class="sub">top-3 relevant chunks</span></div>
+        <div class="service-box">OpenRouter<span class="sub">claude-3-5-haiku · stream</span></div>
+      </div>
+    </div>
+
+    <div class="v-line arrow" style="height:24px; width:1px; margin:0 auto;"></div>
+
+    <div style="display:flex; justify-content:center;">
+      <div class="box box-gray" style="width:320px; text-align:center;">
+        Streaming Response
+        <span class="sub">SSE tokens → browser in real-time · ends with [DONE]</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP TABLE ── -->
+  <table class="step-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Step</th>
+        <th>Detail</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Upload image</td><td>JPEG / PNG / WebP, max 10 MB via drag-and-drop on the frontend</td></tr>
+      <tr><td>2</td><td>POST /analyze</td><td>Multipart form to FastAPI. Rate limiter checks IP (20/min)</td></tr>
+      <tr><td>3</td><td>VisionAgent</td><td>Image base64-encoded, sent to <code>gemini-2.5-flash</code> via OpenRouter. Returns JSON with building type, construction stage, and component list with quantities</td></tr>
+      <tr><td>4</td><td>EstimationAgent</td><td>Each component looked up in SQLite by name or category. Unit price × quantity = subtotal. Unpriced items shown as 0 with "price not found" note</td></tr>
+      <tr><td>5</td><td>Labor + total</td><td>35% of materials added as labor estimate. <code>grand_total_gel</code> computed</td></tr>
+      <tr><td>6</td><td>Approval gate</td><td>If total &gt; 500,000 GEL → HumanReview node appends warning, sets <code>approval_required = true</code></td></tr>
+      <tr><td>7</td><td>SessionStore</td><td>Estimate stored in-memory under UUID session_id. Returned to frontend alongside model metadata</td></tr>
+      <tr><td>8</td><td>Report rendered</td><td>Frontend displays itemized table. session_id stored for follow-up chat</td></tr>
+      <tr><td>9</td><td>POST /chat/stream</td><td>User question + session_id sent. Rate limit: 60/min</td></tr>
+      <tr><td>10</td><td>ChatAgent builds context</td><td>Loads estimate from SessionStore. Retrieves top-3 RAG chunks from ChromaDB. Injects both into system prompt</td></tr>
+      <tr><td>11</td><td>Streaming response</td><td><code>claude-3-5-haiku</code> streams tokens as SSE <code>data: {"token":"…"}</code> events. Full reply saved to session history. Ends with <code>data: [DONE]</code></td></tr>
+    </tbody>
+  </table>
+
+</div><!-- end canvas -->
+
+</body>
+</html>
