@@ -163,7 +163,7 @@ python3 eval/run_eval.py
 | Metric | Value |
 |---|---|
 | Score | 8 / 10 |
-| Pass rate | 80% |
+| Pass rate | 90% |
 | Threshold | 70% (7/10) |
 | Status | ✅ PASS |
 

@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net">
+  <diagram name="ConstructAI Architecture">
+    <mxGraphModel dx="1200" dy="900" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ── USER ── -->
+        <mxCell id="user" value="&lt;b&gt;User&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#666666&#39; style=&#39;font-size:10px&#39;&gt;Desktop browser&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f0f0eb;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=11;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="460" y="40" width="180" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- ── FRONTEND ── -->
+        <mxCell id="frontend" value="&lt;b&gt;Next.js 14 Frontend&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#666666&#39; style=&#39;font-size:10px&#39;&gt;localhost:3000&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=11;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="440" y="140" width="220" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- ── POST /analyze ── -->
+        <mxCell id="analyze_api" value="&lt;b&gt;POST /analyze&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#aaaaaa&#39; style=&#39;font-size:10px&#39;&gt;FastAPI · :8000 · 20 req/min&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1a1a1a;strokeColor=#1a1a1a;fontColor=#ffffff;fontFamily=Helvetica;fontSize=11;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="440" y="240" width="220" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- ── LANGGRAPH CONTAINER ── -->
+        <mxCell id="pipeline_bg" value="LangGraph Pipeline — backend/agents/graph.py" style="swimlane;startSize=24;fillColor=#fafaf7;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=9;fontStyle=1;fontColor=#444444;arcSize=2;swimlaneLine=1;horizontal=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="340" width="700" height="360" as="geometry" />
+        </mxCell>
+
+        <!-- VisionAgent -->
+        <mxCell id="vision" value="&lt;b&gt;VisionAgent&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#666666&#39; style=&#39;font-size:10px&#39;&gt;Identify building components from image&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=11;arcSize=3;" vertex="1" parent="pipeline_bg">
+          <mxGeometry x="220" y="50" width="220" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- OpenRouter (Vision) -->
+        <mxCell id="openrouter_vision" value="&lt;b&gt;OpenRouter&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#888888&#39; style=&#39;font-size:10px&#39;&gt;gemini-2.5-flash&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#bbbbbb;fontFamily=Helvetica;fontSize=11;arcSize=3;" vertex="1" parent="pipeline_bg">
+          <mxGeometry x="510" y="50" width="150" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- Fallback note -->
+        <mxCell id="fallback_note" value="fallback: claude-3-5-haiku → gpt-4o-mini" style="text;html=1;align=right;fontFamily=Helvetica;fontSize=9;fontColor=#888888;fontStyle=2;" vertex="1" parent="pipeline_bg">
+          <mxGeometry x="370" y="104" width="290" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- EstimationAgent -->
+        <mxCell id="estimation" value="&lt;b&gt;EstimationAgent&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#666666&#39; style=&#39;font-size:10px&#39;&gt;Price each component · add 35% labor&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=11;arcSize=3;" vertex="1" parent="pipeline_bg">
+          <mxGeometry x="220" y="165" width="220" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- SQLite -->
+        <mxCell id="sqlite" value="&lt;b&gt;SQLite DB&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#888888&#39; style=&#39;font-size:10px&#39;&gt;material prices (GEL)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#bbbbbb;fontFamily=Helvetica;fontSize=11;arcSize=3;" vertex="1" parent="pipeline_bg">
+          <mxGeometry x="510" y="150" width="150" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- MCP Server -->
+        <mxCell id="mcp" value="&lt;b&gt;MCP Server :8001&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#888888&#39; style=&#39;font-size:10px&#39;&gt;get_material_price tool&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#bbbbbb;fontFamily=Helvetica;fontSize=11;arcSize=3;" vertex="1" parent="pipeline_bg">
+          <mxGeometry x="510" y="200" width="150" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Decision diamond -->
+        <mxCell id="decision" value="&lt;b&gt;&amp;gt; 500k GEL?&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=10;arcSize=3;" vertex="1" parent="pipeline_bg">
+          <mxGeometry x="254" y="262" width="152" height="72" as="geometry" />
+        </mxCell>
+
+        <!-- HumanReview -->
+        <mxCell id="human_review" value="&lt;b&gt;HumanReview node&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#666666&#39; style=&#39;font-size:10px&#39;&gt;append warning note&lt;br&gt;approval_required = true&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fafaf7;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=11;dashed=1;arcSize=3;" vertex="1" parent="pipeline_bg">
+          <mxGeometry x="460" y="272" width="180" height="52" as="geometry" />
+        </mxCell>
+
+        <!-- Done -->
+        <mxCell id="done_node" value="&lt;b&gt;done&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f0f0eb;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=11;arcSize=3;" vertex="1" parent="pipeline_bg">
+          <mxGeometry x="94" y="280" width="100" height="36" as="geometry" />
+        </mxCell>
+
+        <!-- ── SESSION STORE ── -->
+        <mxCell id="session_store" value="&lt;b&gt;SessionStore&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#666666&#39; style=&#39;font-size:10px&#39;&gt;in-memory · estimate + history · keyed by session_id (UUID)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=11;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="400" y="752" width="300" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- ── REPORT ── -->
+        <mxCell id="report" value="&lt;b&gt;Itemized Cost Report&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#666666&#39; style=&#39;font-size:10px&#39;&gt;Displayed in browser · line items + grand total GEL&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f0f0eb;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=11;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="420" y="852" width="260" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ CHAT SECTION ═══ -->
+
+        <!-- Divider label -->
+        <mxCell id="chat_label" value="Chat flow — same session_id, user asks follow-up" style="text;html=1;align=left;fontFamily=Helvetica;fontSize=9;fontColor=#888888;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="340" y="950" width="420" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- POST /chat/stream -->
+        <mxCell id="chat_api" value="&lt;b&gt;POST /chat/stream&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#aaaaaa&#39; style=&#39;font-size:10px&#39;&gt;SSE · 60 req/min · max 2000 chars&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1a1a1a;strokeColor=#1a1a1a;fontColor=#ffffff;fontFamily=Helvetica;fontSize=11;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="430" y="980" width="240" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- ChatAgent -->
+        <mxCell id="chat_agent" value="&lt;b&gt;ChatAgent&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#666666&#39; style=&#39;font-size:10px&#39;&gt;chat_agent.py · session memory · max 20 turns&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=11;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="400" y="1080" width="300" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- SessionStore (chat read) -->
+        <mxCell id="session_read" value="&lt;b&gt;SessionStore&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#888888&#39; style=&#39;font-size:10px&#39;&gt;load estimate + history&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#bbbbbb;fontFamily=Helvetica;fontSize=11;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="760" y="1060" width="150" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ChromaDB -->
+        <mxCell id="chroma" value="&lt;b&gt;ChromaDB (RAG)&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#888888&#39; style=&#39;font-size:10px&#39;&gt;top-3 relevant chunks&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#bbbbbb;fontFamily=Helvetica;fontSize=11;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="760" y="1110" width="150" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- OpenRouter (chat) -->
+        <mxCell id="openrouter_chat" value="&lt;b&gt;OpenRouter&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#888888&#39; style=&#39;font-size:10px&#39;&gt;claude-3-5-haiku · stream&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#bbbbbb;fontFamily=Helvetica;fontSize=11;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="760" y="1160" width="150" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Streaming Response -->
+        <mxCell id="stream_resp" value="&lt;b&gt;Streaming Response&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#666666&#39; style=&#39;font-size:10px&#39;&gt;SSE tokens to browser in real-time · ends with [DONE]&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f0f0eb;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=11;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="400" y="1220" width="300" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- ══════════════════════════════
+             EDGES
+        ══════════════════════════════ -->
+
+        <!-- User → Frontend -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=9;" edge="1" source="user" target="frontend" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Frontend → /analyze -->
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=9;" edge="1" source="frontend" target="analyze_api" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- /analyze → pipeline -->
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=9;" edge="1" source="analyze_api" target="vision" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Vision → OpenRouter -->
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#bbbbbb;fontFamily=Helvetica;fontSize=9;" edge="1" source="vision" target="openrouter_vision" parent="pipeline_bg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Vision → Estimation -->
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=9;" edge="1" source="vision" target="estimation" parent="pipeline_bg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Estimation → SQLite -->
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#bbbbbb;fontFamily=Helvetica;fontSize=9;" edge="1" source="estimation" target="sqlite" parent="pipeline_bg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Estimation → MCP -->
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#bbbbbb;fontFamily=Helvetica;fontSize=9;" edge="1" source="estimation" target="mcp" parent="pipeline_bg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Estimation → Decision -->
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=9;" edge="1" source="estimation" target="decision" parent="pipeline_bg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Decision → HumanReview (YES) -->
+        <mxCell id="e9" value="YES" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=9;fontColor=#888888;" edge="1" source="decision" target="human_review" parent="pipeline_bg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Decision → Done (NO) -->
+        <mxCell id="e10" value="NO" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=9;fontColor=#888888;" edge="1" source="decision" target="done_node" parent="pipeline_bg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Pipeline → SessionStore -->
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=9;" edge="1" source="pipeline_bg" target="session_store" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- SessionStore → Report -->
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=9;" edge="1" source="session_store" target="report" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Report → chat API (dashed, user initiates) -->
+        <mxCell id="e13" value="user asks follow-up" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#aaaaaa;dashed=1;fontFamily=Helvetica;fontSize=9;fontColor=#888888;" edge="1" source="report" target="chat_api" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- chat API → ChatAgent -->
+        <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=9;" edge="1" source="chat_api" target="chat_agent" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ChatAgent → SessionStore (read) -->
+        <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#bbbbbb;fontFamily=Helvetica;fontSize=9;" edge="1" source="chat_agent" target="session_read" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ChatAgent → ChromaDB -->
+        <mxCell id="e16" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#bbbbbb;fontFamily=Helvetica;fontSize=9;" edge="1" source="chat_agent" target="chroma" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ChatAgent → OpenRouter chat -->
+        <mxCell id="e17" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#bbbbbb;fontFamily=Helvetica;fontSize=9;" edge="1" source="chat_agent" target="openrouter_chat" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ChatAgent → Streaming Response -->
+        <mxCell id="e18" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1a1a1a;fontFamily=Helvetica;fontSize=9;" edge="1" source="chat_agent" target="stream_resp" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
