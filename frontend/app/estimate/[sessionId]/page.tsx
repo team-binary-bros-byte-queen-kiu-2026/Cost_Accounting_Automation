@@ -5,6 +5,10 @@ import CostBreakdown from "@/components/CostBreakdown";
 import ChatStream from "@/components/ChatStream";
 import { getStoredEstimate } from "@/lib/api";
 
+function tabStorageKey(sessionId: string) {
+  return `estimate_tab_${sessionId}`;
+}
+
 export default function EstimatePage() {
   const params = useParams();
   const sessionId = params.sessionId as string;
@@ -14,7 +18,17 @@ export default function EstimatePage() {
   useEffect(() => {
     const stored = getStoredEstimate(sessionId);
     if (stored) setEstimate(stored);
+
+    const savedTab = sessionStorage.getItem(tabStorageKey(sessionId));
+    if (savedTab === "chat" || savedTab === "estimate") {
+      setActiveTab(savedTab);
+    }
   }, [sessionId]);
+
+  const selectTab = (tab: "estimate" | "chat") => {
+    setActiveTab(tab);
+    sessionStorage.setItem(tabStorageKey(sessionId), tab);
+  };
 
   if (!estimate) {
     return (
@@ -74,7 +88,7 @@ export default function EstimatePage() {
         {(["estimate", "chat"] as const).map((tab) => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab)}
+            onClick={() => selectTab(tab)}
             className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors capitalize
               ${activeTab === tab ? "bg-sky-600 text-white" : "text-slate-400 hover:text-white"}`}
           >
@@ -86,7 +100,7 @@ export default function EstimatePage() {
       {activeTab === "estimate" ? (
         <CostBreakdown estimate={estimate} sessionId={sessionId} />
       ) : (
-        <ChatStream sessionId={sessionId} />
+        <ChatStream sessionId={sessionId} estimate={estimate} />
       )}
     </div>
   );

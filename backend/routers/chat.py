@@ -14,6 +14,7 @@ router = APIRouter()
 class ChatRequest(BaseModel):
     session_id: str
     message: str
+    estimate: dict | None = None  # resync from client sessionStorage after refresh/reload
 
 
 @router.post("/chat/stream")
@@ -31,6 +32,7 @@ async def chat_stream(request: Request, body: ChatRequest):
             for chunk in get_chat_stream(
                 session_id=body.session_id,
                 user_message=body.message,
+                estimate=body.estimate,
             ):
                 yield chunk
         except Exception as e:

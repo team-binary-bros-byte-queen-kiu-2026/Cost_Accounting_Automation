@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef } from "react";
+import { transcribeAudio } from "@/lib/api";
 
-// Animated sound-wave bars shown while listening / processing
 function SoundWave() {
   return (
     <span className="flex items-end gap-[3px] h-5 w-6">
@@ -20,9 +20,6 @@ function SoundWave() {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Any = any;
-
 export default function VoiceInput({
   onTranscript,
   onProcessingChange,
@@ -34,64 +31,89 @@ export default function VoiceInput({
 }) {
   const [listening, setListening] = useState(false);
   const [processing, setProcessing] = useState(false);
-  const recRef = useRef<Any>(null);
-  const resultReceivedRef = useRef(false);
+  const mediaRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const setProc = (val: boolean) => {
     setProcessing(val);
     onProcessingChange?.(val);
   };
 
-  const toggle = () => {
-    if (listening || processing) {
-      recRef.current?.stop();
-      setListening(false);
-      setProc(false);
+  const stopStream = () => {
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+  };
+
+  const toggle = async () => {
+    if (processing) return;
+
+    if (listening) {
+      mediaRef.current?.stop();
       return;
     }
 
-    const W = window as Any;
-    const SpeechRec = W.SpeechRecognition || W.webkitSpeechRecognition;
-    if (!SpeechRec) {
-      alert("Voice input requires Chrome or Edge.");
+    if (!navigator.mediaDevices?.getUserMedia) {
+      alert("Voice input is not supported in this browser.");
       return;
     }
 
-    const rec = new SpeechRec();
-    rec.lang = "en-US";
-    rec.continuous = false;
-    rec.interimResults = false;
-    rec.maxAlternatives = 1;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      chunksRef.current = [];
 
-    resultReceivedRef.current = false;
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : MediaRecorder.isTypeSupported("audio/webm")
+          ? "audio/webm"
+          : "audio/mp4";
 
-    // Result arrives → clear processing, pass text up
-    rec.onresult = (e: Any) => {
-      resultReceivedRef.current = true;
-      setProc(false);
-      const text: string = e.results[0]?.[0]?.transcript ?? "";
-      if (text) onTranscript(text);
-    };
+      const recorder = new MediaRecorder(stream, { mimeType });
+      mediaRef.current = recorder;
 
-    // Speech ended — switch from wave to processing dots
-    rec.onspeechend = () => {
-      setListening(false);
-      if (!resultReceivedRef.current) setProc(true);
-    };
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) chunksRef.current.push(event.data);
+      };
 
-    rec.onend = () => {
-      setListening(false);
-      if (resultReceivedRef.current) setProc(false);
-    };
+      recorder.onstop = async () => {
+        setListening(false);
+        stopStream();
 
-    rec.onerror = () => {
-      setListening(false);
-      setProc(false);
-    };
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        if (blob.size < 500) {
+          alert("Recording too short. Click the mic, speak, then click again to stop.");
+          return;
+        }
 
-    recRef.current = rec;
-    rec.start();
-    setListening(true);
+        setProc(true);
+        try {
+          const text = await transcribeAudio(blob);
+          if (text.trim()) {
+            onTranscript(text.trim());
+          } else {
+            alert("No speech detected. Please try again.");
+          }
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "Transcription failed.";
+          alert(msg);
+        } finally {
+          setProc(false);
+        }
+      };
+
+      recorder.onerror = () => {
+        setListening(false);
+        setProc(false);
+        stopStream();
+        alert("Recording failed. Please try again.");
+      };
+
+      recorder.start();
+      setListening(true);
+    } catch {
+      alert("Microphone access denied. Allow microphone permission for this site in browser settings.");
+    }
   };
 
   const active = listening || processing;
@@ -102,9 +124,11 @@ export default function VoiceInput({
       onClick={toggle}
       disabled={disabled && !active}
       title={
-        processing ? "Processing…"
-        : listening ? "Click to stop"
-        : "Click to speak"
+        processing
+          ? "Transcribing…"
+          : listening
+            ? "Click to stop recording"
+            : "Click to record a question"
       }
       className={`p-3 rounded-xl transition-all select-none min-w-[46px] flex items-center justify-center
         ${active
@@ -113,7 +137,6 @@ export default function VoiceInput({
         ${disabled && !active ? "opacity-50 cursor-not-allowed" : ""}`}
     >
       {processing ? (
-        // 3 bouncing dots while waiting for transcript
         <span className="flex items-center gap-[3px] h-5">
           {[0, 1, 2].map((i) => (
             <span
