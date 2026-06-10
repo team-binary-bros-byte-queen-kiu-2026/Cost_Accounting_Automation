@@ -172,7 +172,7 @@ From `logs/episode-log.jsonl` + `logs/episode_log.jsonl` (153 entries, regenerat
 | Chat response | claude-3-5-haiku | ~2,500 | ~400 | ~$0.0036 | ~$3.60 |
 | Embedding | text-embedding-3-small | ~300 | — | ~$0.000006 | ~$0.006 |
 
-**Total logged LLM spend:** ~$0.44 · **Cache hit rate:** 67.8% · **Eval pass rate:** 7/10 (70%)
+**Total logged LLM spend:** ~$0.44 · **Cache hit rate:** 93.2% · **Eval pass rate:** 9/10 (90%)
 
 ---
 
@@ -247,6 +247,24 @@ To update to real market prices:
 https://youtu.be/64gd22-Ofqw
 
 
+https://youtu.be/64gd22-Ofqw
+
+---
+
+## Eval Results Summary
+
+Latest run: `eval/results/latest.json` — 2026-06-10
+
+| Metric | Value | Threshold | Status |
+|---|---|---|---|
+| Golden-set pass rate | 9 / 10 (90%) | ≥ 70% | ✅ |
+| p95 latency | 4,406 ms | ≤ 5,000 ms | ✅ |
+| Avg cost / request | $0.0048 | — | ✅ |
+| Cache hit rate | 93.2% | ≥ 30% | ✅ |
+| Fallback rate | 4.5% | ≤ 10% | ✅ |
+| Error rate | 1.7% | ≤ 5% | ✅ |
+
+Full metrics: [`docs/metrics-report.md`](docs/metrics-report.md)
 
 ---
 
